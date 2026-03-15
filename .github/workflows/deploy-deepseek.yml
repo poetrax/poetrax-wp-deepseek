@@ -24,7 +24,8 @@ jobs:
           FTP_PASS: ${{ secrets.FTP_PASS_DEEPSEEK }}
           REMOTE_PATH: ${{ secrets.REMOTE_PATH_DEEPSEEK }}
         run: |
-          lftp -c "set ftp:ssl-allow no; 
+          lftp -c "set ftp:ssl-force false;
+                   set ftp:ssl-protect-data false;
                    set ssl:verify-certificate false;
                    open -u $FTP_USER,$FTP_PASS $FTP_HOST; 
                    mirror -R --delete --verbose ./wp-content/ $REMOTE_PATH/wp-content/"
