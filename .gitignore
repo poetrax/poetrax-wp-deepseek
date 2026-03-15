@@ -1,0 +1,58 @@
+# WordPress core
+wp-admin/
+wp-includes/
+wp-*.php
+index.php
+xmlrpc.php
+license.txt
+readme.html
+
+# Загруженные медиафайлы
+wp-content/uploads/
+wp-content/blogs.dir/
+wp-content/upgrade/
+
+# Сторонние плагины (кроме кастомных)
+wp-content/plugins/*
+!wp-content/plugins/poetrax-*/
+!wp-content/plugins/bm-*/
+
+# Кэш
+wp-content/cache/
+wp-content/w3tc-config/
+
+# Конфиги с секретами
+wp-config.php
+wp-config-local.php
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Логи
+*.log
+deploy.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Локальные бэкапы БД
+*.sql
+*.sql.gz
+*.bak
+
+# Node (если вдруг)
+node_modules/
+package-lock.json
