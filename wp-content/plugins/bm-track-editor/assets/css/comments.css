@@ -1,0 +1,316 @@
+/**
+ * BM Comments System Styles
+ */
+
+/* Общий контейнер */
+.bm-comments {
+    margin: 40px 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.bm-comments-title {
+    font-size: 24px;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+/* Дерево комментариев */
+.bm-comments-tree {
+    margin-bottom: 30px;
+}
+
+/* Один комментарий */
+.bm-comment {
+    margin-bottom: 20px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+    .bm-comment:hover {
+        background: #f5f5f5;
+    }
+
+    /* Уровни вложенности */
+    .bm-comment[data-level="1"] {
+        margin-left: 40px;
+    }
+
+    .bm-comment[data-level="2"] {
+        margin-left: 80px;
+    }
+
+    .bm-comment[data-level="3"] {
+        margin-left: 120px;
+    }
+
+/* Заголовок комментария */
+.bm-comment-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.bm-comment-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background: #ddd;
+    overflow: hidden;
+}
+
+    .bm-comment-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.bm-comment-author {
+    font-weight: 600;
+    color: #333;
+    margin-right: 10px;
+}
+
+.bm-comment-date {
+    color: #999;
+    font-size: 13px;
+}
+
+.bm-comment-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    margin-left: 10px;
+}
+
+    .bm-comment-badge.author {
+        background: #007cba;
+        color: #fff;
+    }
+
+    .bm-comment-badge.moderated {
+        background: #f0ad4e;
+        color: #fff;
+    }
+
+/* Текст комментария */
+.bm-comment-content {
+    margin-bottom: 10px;
+    line-height: 1.6;
+    color: #444;
+}
+
+/* Действия с комментарием */
+.bm-comment-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.bm-comment-reply,
+.bm-comment-like {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+    .bm-comment-reply:hover,
+    .bm-comment-like:hover {
+        background: #e0e0e0;
+        color: #333;
+    }
+
+    .bm-comment-like.liked {
+        color: #e74c3c;
+    }
+
+        .bm-comment-like.liked .like-count {
+            color: #e74c3c;
+        }
+
+.like-count {
+    margin-left: 5px;
+    font-weight: 600;
+}
+
+/* Форма комментария */
+.bm-comment-form {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+}
+
+    .bm-comment-form h3 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 18px;
+    }
+
+.bm-form-row {
+    margin-bottom: 15px;
+}
+
+    .bm-form-row label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .bm-form-row input[type="text"],
+    .bm-form-row input[type="email"],
+    .bm-form-row input[type="url"],
+    .bm-form-row textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.2s;
+    }
+
+        .bm-form-row input:focus,
+        .bm-form-row textarea:focus {
+            border-color: #007cba;
+            outline: none;
+        }
+
+    .bm-form-row textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .bm-form-row.checkbox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .bm-form-row.checkbox input {
+            width: auto;
+        }
+
+/* Кнопки формы */
+.bm-form-submit {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.bm-submit-button {
+    background: #007cba;
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    .bm-submit-button:hover {
+        background: #005a87;
+    }
+
+    .bm-submit-button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+/* Форма ответа */
+.bm-comment-form-reply {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+
+/* Сообщения */
+.bm-comment-message {
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    display: none;
+}
+
+    .bm-comment-message.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .bm-comment-message.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+/* Загрузка ещё */
+.bm-comments-load-more {
+    text-align: center;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    .bm-comments-load-more:hover {
+        background: #e8e8e8;
+    }
+
+    .bm-comments-load-more.loading {
+        cursor: wait;
+        opacity: 0.7;
+    }
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.bm-comment {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .bm-comment[data-level="1"] {
+        margin-left: 20px;
+    }
+
+    .bm-comment[data-level="2"] {
+        margin-left: 40px;
+    }
+
+    .bm-comment[data-level="3"] {
+        margin-left: 60px;
+    }
+
+    .bm-comment-header {
+        flex-wrap: wrap;
+    }
+
+    .bm-comment-avatar {
+        width: 30px;
+        height: 30px;
+    }
+}

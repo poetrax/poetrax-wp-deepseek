@@ -1,0 +1,21 @@
+/**
+ * Классический стиль (как в WordPress)
+ */
+.bm-te-style-classic .bm-te-card {
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    border-radius: 0;
+}
+
+.bm-te-style-classic .bm-te-button-primary {
+    border-radius: 3px;
+    background: #0071a1;
+    border: none;
+}
+
+.bm-te-style-classic .bm-te-form-row input,
+.bm-te-style-classic .bm-te-form-row select {
+    border: 1px solid #8c8f94;
+    border-radius: 3px;
+    padding: 5px 8px;
+}

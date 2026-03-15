@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8
+    container_name: poetrax_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: poetrax
+      MYSQL_USER: poetrax
+      MYSQL_PASSWORD: ${DB_PASSWORD:-changeme}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - poetrax_network
+
+  wordpress-claude:
+    image: wordpress:6-php8.2-apache
+    container_name: poetrax_wp_claude
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: poetrax
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      WORDPRESS_DB_NAME: poetrax
+      WORDPRESS_DEBUG: 1
+      VIRTUAL_HOST: poetrax-local.online  # для локального домена
+    volumes:
+      - ./wp-content/themes/poetrax:/var/www/html/wp-content/themes/poetrax
+      - ./wp-content/plugins:/var/www/html/wp-content/plugins
+      - ./wp-content/mu-plugins:/var/www/html/wp-content/mu-plugins
+      - ./wp-content/uploads:/var/www/html/wp-content/uploads
+      - ./php.ini:/usr/local/etc/php/conf.d/php.ini
+    depends_on:
+      - db
+    networks:
+      - poetrax_network
+
+  wordpress-deepseek:
+    image: wordpress:6-php8.2-apache
+    container_name: poetrax_wp_deepseek
+    restart: unless-stopped
+    ports:
+      - "8082:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: poetrax
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      WORDPRESS_DB_NAME: poetrax_deepseek
+      WORDPRESS_DEBUG: 1
+      VIRTUAL_HOST: poetrax-local.ru
+    volumes:
+      - ../poetrax-wp-deepseek/wp-content/themes/poetrax:/var/www/html/wp-content/themes/poetrax
+      - ../poetrax-wp-deepseek/wp-content/plugins:/var/www/html/wp-content/plugins
+      - ../poetrax-wp-deepseek/wp-content/uploads:/var/www/html/wp-content/uploads
+      - ./php.ini:/usr/local/etc/php/conf.d/php.ini
+    depends_on:
+      - db
+    networks:
+      - poetrax_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: poetrax_pma
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: poetrax
+      PMA_PASSWORD: ${DB_PASSWORD:-changeme}
+      UPLOAD_LIMIT: 128M
+    depends_on:
+      - db
+    networks:
+      - poetrax_network
+
+volumes:
+  db_data:
+
+networks:
+  poetrax_network:

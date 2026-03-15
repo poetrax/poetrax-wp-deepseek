@@ -1,0 +1,184 @@
+﻿/**
+Theme Name: My Music Band
+Template: my-music-band
+Theme URI: '+WP_HOME+'/themes/bestmz
+Author: Catch Themes
+Author URI: https://catchthemes.com/
+Text Domain: my-music-band
+*/
+
+/* recaptcha*/
+form .wpcf7-form resetting {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+form .rc-anchor-content {
+    margin: 15px 0;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+#rc-anchor-container {
+    max-width: 100%;
+    box-sizing: border-box;
+    font-family: Roboto, helvetica, arial, sans-serif;
+    border-radius: 3px;
+    background-color: #f9f9f9;
+    border: 1px solid #d3d3d3;
+    box-shadow: 0 0 4px 1px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+/* Адаптивная верстка для разных размеров экрана */
+@media (max-width: 480px) {
+    #rc-anchor-container {
+        transform: scale(0.9);
+        transform-origin: left center;
+        margin: 5px 0;
+    }
+
+    .rc-anchor-normal-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .rc-anchor-pt {
+        margin-top: 8px;
+        font-size: 0.85em;
+    }
+}
+
+@media (max-width: 320px) {
+    #rc-anchor-container {
+        transform: scale(0.8);
+    }
+
+    .rc-anchor-content {
+        flex-direction: column;
+    }
+}
+
+/* Стили для контейнера */
+.rc-anchor {
+    display: inline-block;
+    overflow: hidden;
+}
+
+.rc-anchor-normal {
+    width: 300px;
+    height: 74px;
+}
+
+/* Гибкая верстка содержимого */
+.rc-anchor-content {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    min-height: 60px;
+}
+
+.rc-inline-block {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.rc-anchor-center-container {
+    display: table;
+    height: 100%;
+}
+
+.rc-anchor-center-item {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+/* Стили для чекбокса */
+.recaptcha-checkbox {
+    display: inline-block;
+    height: 28px;
+    width: 28px;
+    overflow: hidden;
+    background-color: #fff;
+    border: 2px solid #c6c6c6;
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+}
+
+.recaptcha-checkbox-unchecked {
+    background-color: #fff;
+}
+
+.recaptcha-checkbox-checked {
+    background-color: #4285f4;
+    border-color: #4285f4;
+}
+
+/* Футер */
+.rc-anchor-normal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px 10px;
+    font-size: 10px;
+    color: #555;
+}
+
+.rc-anchor-logo-portrait {
+    display: flex;
+    align-items: center;
+}
+
+.rc-anchor-logo-text {
+    margin-left: 5px;
+    font-weight: 500;
+}
+
+.rc-anchor-pt a {
+    color: #555;
+    text-decoration: none;
+}
+
+    .rc-anchor-pt a:hover {
+        text-decoration: underline;
+    }
+
+/* Сообщения об ошибках */
+.rc-anchor-error-msg-container {
+    color: #d93025;
+    font-size: 12px;
+    padding: 5px 10px;
+}
+
+/* Для темной темы */
+@media (prefers-color-scheme: dark) {
+    #rc-anchor-container {
+        background-color: #2b2b2b;
+        border-color: #555;
+    }
+
+    .recaptcha-checkbox {
+        background-color: #444;
+        border-color: #666;
+    }
+
+    .rc-anchor-pt a {
+        color: #ccc;
+    }
+}
+
+/* Анимации */
+.recaptcha-checkbox {
+    transition: all 0.2s ease;
+}
+
+    .recaptcha-checkbox:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.3);
+    }
+
+/* recaptcha*/
+

@@ -1,0 +1,237 @@
+/**
+ * BM Track Editor - Основные стили
+ */
+
+/* Общие стили */
+.bm-te-wrap {
+    margin: 20px 0;
+    max-width: 1400px;
+}
+
+.bm-te-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Карточки */
+.bm-te-card {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+    .bm-te-card h2,
+    .bm-te-card h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+/* Сетка */
+.bm-te-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.bm-te-grid-item {
+    background: #f9f9f9;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    padding: 15px;
+    transition: all 0.3s ease;
+}
+
+    .bm-te-grid-item:hover {
+        border-color: #007cba;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+/* Формы */
+.bm-te-form-row {
+    margin-bottom: 15px;
+}
+
+    .bm-te-form-row label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #23282d;
+    }
+
+    .bm-te-form-row input[type="text"],
+    .bm-te-form-row input[type="number"],
+    .bm-te-form-row select,
+    .bm-te-form-row textarea {
+        width: 100%;
+        max-width: 500px;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        padding: 8px 12px;
+        transition: border-color 0.2s;
+    }
+
+        .bm-te-form-row input:focus,
+        .bm-te-form-row select:focus,
+        .bm-te-form-row textarea:focus {
+            border-color: #007cba;
+            outline: none;
+            box-shadow: 0 0 0 1px #007cba;
+        }
+
+/* Таблицы */
+.bm-te-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+    .bm-te-table th {
+        text-align: left;
+        padding: 12px;
+        background: #f1f1f1;
+        font-weight: 600;
+    }
+
+    .bm-te-table td {
+        padding: 12px;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    .bm-te-table tr:hover td {
+        background: #fafafa;
+    }
+
+/* Кнопки */
+.bm-te-button {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+}
+
+.bm-te-button-primary {
+    background: #007cba;
+    color: #fff;
+}
+
+    .bm-te-button-primary:hover {
+        background: #006ba1;
+        color: #fff;
+    }
+
+.bm-te-button-secondary {
+    background: #f1f1f1;
+    color: #23282d;
+    border: 1px solid #ccd0d4;
+}
+
+    .bm-te-button-secondary:hover {
+        background: #e5e5e5;
+    }
+
+/* Уведомления */
+.bm-te-notice {
+    padding: 12px 15px;
+    margin: 15px 0;
+    border-left: 4px solid;
+    background: #fff;
+}
+
+.bm-te-notice-success {
+    border-left-color: #46b450;
+}
+
+.bm-te-notice-error {
+    border-left-color: #dc3232;
+}
+
+.bm-te-notice-warning {
+    border-left-color: #f56e28;
+}
+
+.bm-te-notice-info {
+    border-left-color: #00a0d2;
+}
+
+/* Загрузчик файлов */
+.bm-te-upload-area {
+    border: 2px dashed #ccd0d4;
+    border-radius: 4px;
+    padding: 30px;
+    text-align: center;
+    background: #f9f9f9;
+    transition: all 0.3s;
+}
+
+    .bm-te-upload-area:hover {
+        border-color: #007cba;
+        background: #f0f6fc;
+    }
+
+    .bm-te-upload-area.dragover {
+        border-color: #007cba;
+        background: #e5f0fa;
+    }
+
+.bm-te-file-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    background: #f1f1f1;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+/* Пагинация */
+.bm-te-pagination {
+    display: flex;
+    gap: 5px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+    .bm-te-pagination .page-numbers {
+        display: inline-block;
+        padding: 8px 12px;
+        border: 1px solid #ccd0d4;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #23282d;
+    }
+
+        .bm-te-pagination .page-numbers.current {
+            background: #007cba;
+            color: #fff;
+            border-color: #007cba;
+        }
+
+/* Адаптивность */
+@media (max-width: 1200px) {
+    .bm-te-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+}
+
+@media (max-width: 782px) {
+    .bm-te-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bm-te-table {
+        display: block;
+        overflow-x: auto;
+    }
+}

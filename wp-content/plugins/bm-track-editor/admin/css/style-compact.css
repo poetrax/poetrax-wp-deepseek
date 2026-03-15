@@ -1,0 +1,48 @@
+/**
+ * Компактный стиль
+ */
+.bm-te-style-compact {
+    font-size: 13px;
+}
+
+    .bm-te-style-compact .bm-te-card {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+        .bm-te-style-compact .bm-te-card h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+    .bm-te-style-compact .bm-te-form-row {
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+    }
+
+        .bm-te-style-compact .bm-te-form-row label {
+            width: 120px;
+            margin-bottom: 0;
+            font-size: 12px;
+        }
+
+        .bm-te-style-compact .bm-te-form-row input,
+        .bm-te-style-compact .bm-te-form-row select {
+            width: 250px;
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+    .bm-te-style-compact .bm-te-grid {
+        gap: 10px;
+    }
+
+    .bm-te-style-compact .bm-te-grid-item {
+        padding: 10px;
+    }
+
+    .bm-te-style-compact .bm-te-button {
+        padding: 4px 10px;
+        font-size: 12px;
+    }

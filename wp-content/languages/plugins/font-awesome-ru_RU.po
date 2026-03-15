@@ -1,0 +1,164 @@
+# Translation of Plugins - Font Awesome - Stable (latest release) in Russian
+# This file is distributed under the same license as the Plugins - Font Awesome - Stable (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2023-06-04 12:16:23+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n % 10 == 1 && n % 100 != 11) ? 0 : ((n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) ? 1 : 2);\n"
+"X-Generator: GlotPress/4.0.1\n"
+"Language: ru\n"
+"Project-Id-Version: Plugins - Font Awesome - Stable (latest release)\n"
+
+#: includes/class-fontawesome-exception.php:381
+msgid "This plugin supports WordPress Multisite only for WordPress versions 5.1.0 or newer."
+msgstr "Этот плагин поддерживает WordPress Multisite только для версий WordPress 5.1.0 или новее."
+
+#: includes/class-fontawesome-exception.php:358
+msgid "Whoops! Font Awesome Pro Version 6 is not available from CDN. Please use a Kit."
+msgstr "Упс! Font Awesome Pro версии 6 недоступен в CDN. Пожалуйста, используйте Kit."
+
+#: includes/class-fontawesome-exception.php:503
+msgid "Eek! We're missing the information we need to load the version of Font Awesome you have selected. Go to your Font Awesome plugin settings page, re-select a version, and save. If that doesn't work, try deactivating and then re-activating the plugin. If that doesn't work either, you might need to delete and re-install the plug-in."
+msgstr "Эй! Нам не хватает информации, необходимой для загрузки выбранной вами версии Font Awesome. Перейдите на страницу настроек плагина Font Awesome, повторно выберите версию и сохраните. Если это не сработает, попробуйте деактивировать, а затем повторно активировать плагин. Если это тоже не работает, возможно, вам придется удалить и переустановить плагин."
+
+#: includes/class-fontawesome-exception.php:615
+msgid "Failed during upgrade when trying to delete the main Font Awesome option."
+msgstr "Ошибка во время обновления при попытке удалить основной параметр Font Awesome."
+
+#. translators: label for link to settings page on plugin listing
+#: includes/class-fontawesome.php:1007
+#: admin/build/381-6aeaddea7b3596619b96.js:4
+msgid "Settings"
+msgstr "Настройки"
+
+#: font-awesome.php:162
+msgid "Unable To Load Font Awesome Plugin."
+msgstr "Не удалось загрузить плагин Font Awesome."
+
+#: includes/class-fontawesome-exception.php:582
+msgid "We were not able to save conflict detection data to your WordPress database."
+msgstr "Нам не удалось сохранить данные об обнаружении конфликтов в вашей базе данных WordPress."
+
+#: includes/class-fontawesome-exception.php:558
+msgid "Inconceivable! Somehow the conflict detection information got garbled into something we can't understand."
+msgstr "Невероятно! Каким-то образом информация об обнаружении конфликтов была искажена во что-то, что мы не можем понять."
+
+#: includes/class-fontawesome-exception.php:532
+msgid "When trying to load Font Awesome, the plugin's configuration was invalid. Try deactivating, uninstalling, and re-activating the Font Awesome plugin."
+msgstr "При попытке загрузить Font Awesome конфигурация плагина была недействительной. Попробуйте деактивировать, удалить и повторно активировать плагин Font Awesome."
+
+#: includes/class-fontawesome-exception.php:479
+msgid "Something went wrong when we tried to store the list of available Font Awesome versions in your WordPress database."
+msgstr "Что-то пошло не так, когда мы попытались сохранить список доступных версий Font Awesome в вашей базе данных WordPress."
+
+#: includes/class-fontawesome-exception.php:454
+msgid "An unexpected response was received from the Font Awesome API server."
+msgstr "От сервера Font Awesome API получен неожиданный ответ."
+
+#: includes/class-fontawesome-exception.php:428
+msgid "Your WordPress server failed trying to send a request to the Font Awesome API server."
+msgstr "Ваш сервер WordPress не смог отправить запрос на сервер Font Awesome API."
+
+#: includes/class-fontawesome-exception.php:403
+msgid "A theme or plugin registered with Font Awesome threw an exception."
+msgstr "Тема или плагин, зарегистрированные в Font Awesome, вызвали исключение."
+
+#: includes/class-fontawesome-exception.php:344
+msgid "Whoops! You found a corner case here. Older Version Compatibility for our webfont technology was not introduced until Font Awesome 5.1.0. Try using a newer version, disabling version 4 compatibility, or switch to SVG."
+msgstr "Упс! Вы нашли здесь угловой ящик. Совместимость со старыми версиями для нашей технологии веб-шрифтов не была представлена до Font Awesome 5.1.0. Попробуйте использовать более новую версию, отключив совместимость с версией 4, или переключитесь на SVG."
+
+#: includes/class-fontawesome-exception.php:329
+msgid "A Font Awesome version number was expected but not given"
+msgstr "Ожидался номер версии Font Awesome, но он не указан"
+
+#: includes/class-fontawesome-exception.php:314
+msgid "A kitToken was given without a valid apiToken"
+msgstr "KitToken был предоставлен без действительного apiToken"
+
+#: includes/class-fontawesome-exception.php:299
+msgid "Pseudo-elements cannot be disabled with webfont technology."
+msgstr "Псевдоэлементы нельзя отключить с помощью технологии веб-шрифтов."
+
+#: includes/class-fontawesome-exception.php:248
+msgid "Your API Token was valid but we couldn't save it for some reason."
+msgstr "Ваш токен API был действителен, но по какой-то причине мы не смогли его сохранить."
+
+#: includes/class-fontawesome-exception.php:223
+msgid "Oh no! It looks like your API Token was valid, but the Font Awesome API server returned an invalid response."
+msgstr "О, нет! Похоже, ваш токен API действителен, но сервер Font Awesome API вернул неверный ответ."
+
+#: includes/class-fontawesome-exception.php:197
+msgid "Whoops, it looks like that API Token is not valid. Try another one?"
+msgstr "К сожалению, похоже, что токен API недействителен. Попробовать другой?"
+
+#: font-awesome.php:417
+msgid "A theme or plugin tried to initialize Font Awesome, but failed."
+msgstr "Тема или плагин пытались инициализировать Font Awesome, но не удалось."
+
+#: font-awesome.php:331
+msgid "Font Awesome Plugin Error Details"
+msgstr "Сведения об ошибке плагина Font Awesome"
+
+#: font-awesome.php:284
+msgid "No error message available."
+msgstr "Сообщение об ошибке отсутствует."
+
+#: font-awesome.php:268
+msgid "The Font Awesome plugin caught a fatal error"
+msgstr "Плагин Font Awesome обнаружил фатальную ошибку"
+
+#: font-awesome.php:245
+msgid "Font Awesome could not be activated."
+msgstr "Не удалось активировать Font Awesome."
+
+#. translators: 1: minimum required php version 2: current php version
+#: font-awesome.php:177
+msgid "Font Awesome requires a PHP Version of at least %1$s. Your current version of PHP is %2$s."
+msgstr "Для Font Awesome требуется версия PHP не ниже %1$s. Ваша текущая версия PHP — %2$s."
+
+#: includes/class-fontawesome-exception.php:148
+msgid "Whoops, it looks like you have not provided a Font Awesome API Token. Enter one on the Font Awesome plugin settings page."
+msgstr "Упс, похоже, вы не предоставили токен Font Awesome API. Введите его на странице настроек плагина Font Awesome."
+
+#: includes/class-fontawesome.php:1042
+msgid "You've got more than one version of the Font Awesome plugin installed."
+msgstr "У вас установлено более одной версии плагина Font Awesome."
+
+#. translators: 1: path to plugin or theme code file 2: current Font Awesome
+#. plugin version number
+#: includes/class-fontawesome.php:1031
+msgid "The active version of the Font Awesome plugin is being loaded by this plugin or theme: %1$s since it's the newest (%2$s). We recommend you update the plugin above to the latest version. In the meantime, we'll use that newer version for editing your Font Awesome settings so you'll be sure to hit 88mph with those icons."
+msgstr "Активная версия подключаемого модуля Font Awesome загружается этим подключаемым модулем или темой: %1$s, поскольку она самая новая (%2$s). Мы рекомендуем вам обновить указанный выше плагин до последней версии. Тем временем мы будем использовать эту более новую версию для редактирования настроек Font Awesome, чтобы вы могли разогнаться до 88 миль в час с этими значками."
+
+#: includes/class-fontawesome.php:1027
+msgid "Great Scott!"
+msgstr "Великий Скотт!"
+
+#. translators: add_options_page page_title
+#: includes/class-fontawesome.php:988
+msgid "Font Awesome Settings"
+msgstr "Настройки Font Awesome"
+
+#. Description of the plugin
+#: index.php
+msgid "The official way to use Font Awesome Free or Pro icons on your site, brought to you by the Font Awesome team."
+msgstr "Официальный способ использования значков Font Awesome Free или Pro на вашем сайте, предоставленный вам командой Font Awesome."
+
+#. Author URI of the plugin
+#: index.php
+msgid "https://fontawesome.com/"
+msgstr "https://fontawesome.com/"
+
+#. Plugin Name of the plugin
+#. Author of the plugin
+#. translators: add_options_page menu_title
+#: index.php includes/class-fontawesome.php:990
+msgid "Font Awesome"
+msgstr "Font Awesome"
+
+#. Plugin URI of the plugin
+#: index.php
+msgid "https://fontawesome.com/how-to-use/on-the-web/using-with/wordpress"
+msgstr "https://fontawesome.com/how-to-use/on-the-web/using-with/wordpress"

@@ -1,0 +1,29 @@
+/**
+ * Современный стиль
+ */
+.bm-te-style-modern .bm-te-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+    .bm-te-style-modern .bm-te-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+
+.bm-te-style-modern .bm-te-button-primary {
+    border-radius: 30px;
+    padding: 10px 24px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    background: linear-gradient(145deg, #007cba, #005a87);
+}
+
+.bm-te-style-modern .bm-te-form-row input,
+.bm-te-style-modern .bm-te-form-row select {
+    border-radius: 8px;
+    border: 2px solid #e5e5e5;
+    padding: 10px 14px;
+}

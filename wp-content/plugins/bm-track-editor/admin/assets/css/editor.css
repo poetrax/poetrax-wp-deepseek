@@ -1,0 +1,219 @@
+.bm-track-editor {
+    max-width: 1400px;
+    margin: 20px 0;
+}
+
+.bm-editor-layout {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.bm-editor-section {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+    .bm-editor-section h3 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        color: #23282d;
+    }
+
+.bm-form-row {
+    margin-bottom: 15px;
+}
+
+    .bm-form-row label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #23282d;
+    }
+
+    .bm-form-row input[type="text"],
+    .bm-form-row input[type="number"],
+    .bm-form-row select,
+    .bm-form-row textarea {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .bm-form-row .description {
+        margin-top: 5px;
+        color: #666;
+        font-style: italic;
+    }
+
+/* Загрузчик файлов */
+.bm-file-uploader {
+    border: 2px dashed #ccd0d4;
+    padding: 20px;
+    text-align: center;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+
+.bm-file-preview {
+    margin-bottom: 15px;
+}
+
+.bm-file-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.bm-file-name {
+    font-weight: 600;
+    color: #23282d;
+}
+
+/* Поиск стихов */
+.bm-poem-selector {
+    position: relative;
+}
+
+.bm-poem-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 300px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-top: none;
+    z-index: 100;
+    display: none;
+}
+
+.bm-poem-result-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+    .bm-poem-result-item:hover {
+        background: #f0f0f0;
+    }
+
+    .bm-poem-result-item strong {
+        display: block;
+        color: #23282d;
+    }
+
+    .bm-poem-result-item span {
+        font-size: 12px;
+        color: #666;
+    }
+
+.bm-selected-poem {
+    margin-top: 10px;
+    padding: 10px;
+    background: #e8f0fe;
+    border-left: 4px solid #4CAF50;
+    border-radius: 2px;
+}
+
+/* Чекбоксы и радио */
+.bm-checkbox-group {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background: #f9f9f9;
+}
+
+.bm-checkbox {
+    display: block;
+    margin-bottom: 5px;
+}
+
+    .bm-checkbox input {
+        margin-right: 8px;
+    }
+
+/* BPM и тональность */
+.bpm-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* Действия */
+.bm-editor-actions {
+    position: sticky;
+    bottom: 20px;
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    padding: 15px;
+    border-radius: 4px;
+    display: flex;
+    gap: 10px;
+}
+
+    .bm-editor-actions .button-primary {
+        flex: 1;
+    }
+
+/* Плеер в редакторе */
+.bm-editor-player {
+    background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+    .bm-editor-player audio {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+/* Адаптивность */
+@media (max-width: 1200px) {
+    .bm-editor-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .bm-editor-actions {
+        position: static;
+    }
+}
+
+/* Список треков */
+.bm-tracks-table {
+    margin-top: 20px;
+}
+
+    .bm-tracks-table th {
+        font-weight: 600;
+    }
+
+    .bm-tracks-table .track-preview {
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .bm-tracks-table .track-actions {
+        display: flex;
+        gap: 5px;
+    }
+
+    .bm-tracks-table .dashicons {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+    }
