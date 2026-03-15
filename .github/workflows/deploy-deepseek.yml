@@ -1,4 +1,4 @@
-name: Deploy to poetrax.online (Reg.ru)
+name: Deploy to poetrax.online (Reg.ru) - Plain FTP
 
 on:
   push:
@@ -9,28 +9,23 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+      
       - name: Install lftp
         run: sudo apt-get update && sudo apt-get install -y lftp
-
-      - name: Deploy via FTP (with full SSL bypass)
+      
+      - name: Deploy via FTP (plain, no SSL)
         env:
           FTP_HOST: ${{ secrets.FTP_HOST_DEEPSEEK }}
           FTP_USER: ${{ secrets.FTP_USER_DEEPSEEK }}
           FTP_PASS: ${{ secrets.FTP_PASS_DEEPSEEK }}
           REMOTE_PATH: ${{ secrets.REMOTE_PATH_DEEPSEEK }}
         run: |
-          lftp -c " 
-            set ftp:ssl-allow false;
-            set ssl:verify-certificate false;
-            set ftp:ssl-force false;
-            set ftp:ssl-protect-data false;
-            set net:max-retries 3;
-            set net:timeout 30;
-            open -u $FTP_USER,$FTP_PASS $FTP_HOST;
-            mirror -R --delete --verbose --no-perms --no-umask ./wp-content/ $REMOTE_PATH/wp-content/
-          "
+          lftp -u $FTP_USER,$FTP_PASS $FTP_HOST <<EOF
+          set ftp:ssl-allow false
+          mirror -R --delete --verbose ./wp-content/ $REMOTE_PATH/wp-content/
+          quit
+          EOF
