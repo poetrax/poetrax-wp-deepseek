@@ -1,7 +1,33 @@
 <?php
 /**
- * BM Core - Must-Use Plugin Loader
+ * Plugin Name: BM Core Loader (Claude)
+ * Description: Загружает ядро BM Core для Poetrax
+ * Version: 1.0.0
+ * Author: Poetrax
  */
+
+// Защита от прямого доступа
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+// Загружаем WordPress-совместимый слой
+require_once __DIR__ . '/bm-shim/wordpress-shim.php';
+
+// Пока просто тестовое сообщение
+add_action('init', function() {
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        error_log('BM Core Loader (Claude): загружен, shim активен');
+    }
+});
+
+// Здесь потом будет подключение ядра
+// require_once __DIR__ . '/bm-core/bootstrap.php';
+
+
+/**
+ * BM Core - Must-Use Plugin Loader
+
 if (!defined('ABSPATH')) exit;
 
 define('BM_CORE_PATH', WP_CONTENT_DIR . '/bm-core/');
@@ -126,3 +152,5 @@ function bm_render_card($item) {
     include BM_CORE_PATH . 'Templates/card.php';
     return ob_get_clean();
 }
+
+ */
