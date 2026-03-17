@@ -41,7 +41,6 @@ class LiveSearch {
         }
 
         this.bindEvents();
-        this.createStyles();
     }
 
     bindEvents() {
@@ -224,102 +223,6 @@ class LiveSearch {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
-    }
-
-    createStyles() {
-        // Добавляем стили, если их ещё нет
-        if (document.getElementById('live-search-styles')) return;
-
-        const style = document.createElement('style');
-        style.id = 'live-search-styles';
-        style.textContent = `
-            .live-search-results {
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: white;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-                max-height: 400px;
-                overflow-y: auto;
-                z-index: 1000;
-                display: none;
-            }
-            
-            .live-search-results.active {
-                display: block;
-            }
-            
-            .search-section {
-                padding: 10px;
-                border-bottom: 1px solid #eee;
-            }
-            
-            .search-section:last-child {
-                border-bottom: none;
-            }
-            
-            .search-section-title {
-                font-size: 12px;
-                color: #666;
-                text-transform: uppercase;
-                margin-bottom: 8px;
-            }
-            
-            .search-item {
-                display: block;
-                padding: 8px 12px;
-                color: #333;
-                text-decoration: none;
-                border-radius: 4px;
-                transition: background 0.2s;
-            }
-            
-            .search-item:hover {
-                background: #f5f5f5;
-            }
-            
-            .search-item-title {
-                display: block;
-                font-weight: 500;
-            }
-            
-            .search-item-subtitle {
-                display: block;
-                font-size: 12px;
-                color: #999;
-            }
-            
-            .search-empty,
-            .search-error,
-            .search-loader {
-                padding: 20px;
-                text-align: center;
-                color: #666;
-            }
-            
-            .search-error {
-                color: #d00;
-            }
-            
-            .loader-spinner {
-                width: 30px;
-                height: 30px;
-                border: 3px solid #f3f3f3;
-                border-top: 3px solid #3498db;
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-                margin: 0 auto 10px;
-            }
-            
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(style);
     }
 }
 
