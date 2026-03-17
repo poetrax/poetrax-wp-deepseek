@@ -13,45 +13,28 @@ abstract class AbstractRepository
     public function __construct()
     {
         $this->connection = Connection::getInstance();
+        $this->table = $this->connection->table($this->getTableName());
     }
 
-    /**
-     * Получить название таблицы (должен определить дочерний класс)
-     */
     abstract protected function getTableName(): string;
 
-    /**
-     * Найти по ID
-     */
     public function find($id)
     {
-        $table = $this->connection->table($this->getTableName());
-        $sql = "SELECT * FROM {$table} WHERE {$this->primaryKey} = :id LIMIT 1";
-        
+        $sql = "SELECT * FROM {$this->table} WHERE {$this->primaryKey} = :id LIMIT 1";
         return $this->connection->fetchOne($sql, ['id' => $id]);
     }
 
-    /**
-     * Найти все записи
-     */
     public function findAll($limit = 100, $offset = 0)
     {
-        $table = $this->connection->table($this->getTableName());
-        $sql = "SELECT * FROM {$table} LIMIT :limit OFFSET :offset";
-        
+        $sql = "SELECT * FROM {$this->table} LIMIT :limit OFFSET :offset";
         return $this->connection->fetchAll($sql, [
             'limit' => $limit,
             'offset' => $offset
         ]);
     }
 
-    /**
-     * Найти по условию
-     */
-    public function findBy($conditions, $limit = null, $orderBy = null)
+    public function findBy(array $conditions, $limit = null, $orderBy = null)
     {
-        $table = $this->connection->table($this->getTableName());
-        
         $where = [];
         $params = [];
         foreach ($conditions as $field => $value) {
@@ -59,7 +42,7 @@ abstract class AbstractRepository
             $params[$field] = $value;
         }
         
-        $sql = "SELECT * FROM {$table} WHERE " . implode(' AND ', $where);
+        $sql = "SELECT * FROM {$this->table} WHERE " . implode(' AND ', $where);
         
         if ($orderBy) {
             $sql .= " ORDER BY {$orderBy}";
@@ -73,36 +56,11 @@ abstract class AbstractRepository
         return $this->connection->fetchAll($sql, $params);
     }
 
-    /**
-     * Найти одну запись по условию
-     */
-    public function findOneBy($conditions)
-    {
-        $table = $this->connection->table($this->getTableName());
-        
-        $where = [];
-        $params = [];
-        foreach ($conditions as $field => $value) {
-            $where[] = "{$field} = :{$field}";
-            $params[$field] = $value;
-        }
-        
-        $sql = "SELECT * FROM {$table} WHERE " . implode(' AND ', $where) . " LIMIT 1";
-        
-        return $this->connection->fetchOne($sql, $params);
-    }
-
-    /**
-     * Создать запись
-     */
     public function create(array $data)
     {
         return $this->connection->insert($this->getTableName(), $data);
     }
 
-    /**
-     * Обновить запись
-     */
     public function update($id, array $data)
     {
         return $this->connection->update(
@@ -112,9 +70,6 @@ abstract class AbstractRepository
         );
     }
 
-    /**
-     * Удалить запись
-     */
     public function delete($id)
     {
         return $this->connection->delete(
@@ -123,15 +78,10 @@ abstract class AbstractRepository
         );
     }
 
-    /**
-     * Подсчитать количество записей
-     */
-    public function count($conditions = [])
+    public function count(array $conditions = [])
     {
-        $table = $this->connection->table($this->getTableName());
-        
         if (empty($conditions)) {
-            $sql = "SELECT COUNT(*) as total FROM {$table}";
+            $sql = "SELECT COUNT(*) as total FROM {$this->table}";
             return $this->connection->fetchOne($sql)->total;
         }
         
@@ -142,16 +92,8 @@ abstract class AbstractRepository
             $params[$field] = $value;
         }
         
-        $sql = "SELECT COUNT(*) as total FROM {$table} WHERE " . implode(' AND ', $where);
+        $sql = "SELECT COUNT(*) as total FROM {$this->table} WHERE " . implode(' AND ', $where);
         
         return $this->connection->fetchOne($sql, $params)->total;
-    }
-
-    /**
-     * Проверить существование записи
-     */
-    public function exists($conditions)
-    {
-        return $this->count($conditions) > 0;
     }
 }
