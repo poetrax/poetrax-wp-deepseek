@@ -154,3 +154,27 @@ function bm_render_card($item) {
 }
 
  */
+// Автозагрузка классов BM Core
+spl_autoload_register(function ($class) {
+    $prefix = 'BM\\Core\\';
+    $base_dir = __DIR__ . '/bm-core/';
+    
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        return;
+    }
+    
+    $relative_class = substr($class, $len);
+    $file = $base_dir . str_replace('\\', '/', $relative_class) . '.php';
+    
+    if (file_exists($file)) {
+        require $file;
+    }
+});
+
+// Инициализация при загрузке WordPress
+add_action('init', function() {
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        error_log('BM Core: Database layer loaded');
+    }
+});
