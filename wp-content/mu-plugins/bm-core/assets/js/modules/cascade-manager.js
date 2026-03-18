@@ -1,214 +1,188 @@
-/**
- * Cascade Manager Module
- * Управление каскадными селектами (родитель-потомок)
- */
-
-class CascadeManager {
+'use strict';
+class CascadeSelectManager {
     constructor() {
+        console.log('✅ CascadeSelectManager: Constructor called');
         this.cache = new Map();
-        this.containers = document.querySelectorAll('.cascade-container');
         this.init();
     }
 
     init() {
-        if (!this.containers.length) return;
+        console.log('✅ CascadeSelectManager: Init started');
 
-        this.loadAllCascades();
-        this.bindEvents();
-    }
+        const containers = document.querySelectorAll('.cascade-container');
+        console.log('✅ CascadeSelectManager: Found containers:', containers.length);
 
-    bindEvents() {
+        // ⭐⭐⭐ ДОБАВЛЯЕМ ОБРАБОТЧИКИ СОБЫТИЙ ⭐⭐⭐
         document.addEventListener('change', (e) => {
             if (e.target.classList.contains('cascade-parent')) {
+                console.log('🎯 Parent select changed:', e.target.value);
                 this.updateChildSelect(e.target);
             }
-            if (e.target.classList.contains('cascade-child')) {
-                this.updateSunoPrompt(e.target);
-            }
         });
+
+        if (containers.length > 0) {
+            console.log('✅ CascadeSelectManager: Starting data loading');
+            this.loadAllCascades();
+        }
     }
 
     async loadAllCascades() {
-        const promises = Array.from(this.containers).map(container => 
-            this.loadCascadeData(container)
-        );
-        
-        await Promise.all(promises);
+        const containers = document.querySelectorAll('.cascade-container');
+        console.log('✅ CascadeSelectManager: Loading data for', containers.length, 'containers');
+
+        for (const container of containers) {
+            await this.loadCascadeData(container);
+        }
     }
 
     async loadCascadeData(container) {
         const cascadeType = container.dataset.cascadeType;
-        const parentSelect = container.querySelector('.cascade-parent');
-        
-        if (!cascadeType || !parentSelect) return;
+        console.log('🔄 Loading data for:', cascadeType);
+
+        // Показываем индикатор загрузки
+        const childSelect = container.querySelector('.cascade-child');
+        childSelect.innerHTML = '<option value="">-- Загрузка... --</option>';
 
         try {
-            // Проверяем кэш
-            if (this.cache.has(cascadeType)) {
-                this.populateParentSelect(parentSelect, this.cache.get(cascadeType));
-                return;
-            }
+            const response = await fetch(ajaxurl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    action: 'get_cascade_data',
+                    cascade_type: cascadeType
+                })
+            });
 
-            // Загружаем с сервера
-            if (!window.ApiClient) {
-                throw new Error('ApiClient not found');
-            }
+            // ⭐⭐⭐ ИСПРАВЛЕНИЕ BOM ⭐⭐⭐
+            let responseText = await response.text();
 
-            const data = await window.ApiClient.get(`/api/cascade/${cascadeType}`);
-            
-            this.cache.set(cascadeType, data);
-            this.populateParentSelect(parentSelect, data);
+            // Очищаем от BOM и невидимых символов
+            responseText = this.cleanResponseText(responseText);
+            console.log('✅ CascadeSelectManager: Cleaned response text: ', responseText.substring(0, 100) + '...');
+
+            const data = JSON.parse(responseText);
+            console.log('✅ CascadeSelectManager: JSON parsed successfully');
+
+            if (data.success) {
+                console.log('🎉 Data loaded');
+                const parentSelect = container.querySelector('.cascade-parent');
+                this.populateParentSelect(parentSelect, data.data.data, cascadeType);
+            }
 
         } catch (error) {
-            console.error(`Failed to load cascade data for ${cascadeType}:`, error);
-            parentSelect.innerHTML = '<option value="">Ошибка загрузки</option>';
+            console.error('💥 AJAX error: ', error);
+            childSelect.innerHTML = '<option value="">-- Ошибка загрузки --</option>';
         }
     }
 
-    populateParentSelect(selectElement, items) {
-        // Сохраняем выбранное значение, если есть
-        const currentValue = selectElement.value;
-        
-        selectElement.innerHTML = '<option value="">-- Выберите категорию --</option>';
+    // Функция очистки ответа от BOM и мусора
+    cleanResponseText(text) {
+        if (typeof text !== 'string') return text;
 
-        items.forEach(item => {
+        // Удаляем BOM и другие невидимые символы
+        return text
+            .replace(/^\uFEFF/, '')  // UTF-8 BOM
+            .replace(/^\uFFFE/, '')  // UTF-16 BOM  
+            .replace(/^[\x00-\x1F\x7F]+/, '') // Управляющие символы
+            .trim();
+    }
+
+    populateParentSelect(selectElement, parents, cascadeType) {
+        console.log('🔄 populateParentSelect called');
+
+        parents.forEach((parent, index) => {
             const option = document.createElement('option');
-            option.value = item.id;
-            option.textContent = item.name;
-            
-            if (item.children) {
-                option.dataset.children = JSON.stringify(item.children);
-            }
-            
+            option.value = parent.id;
+            option.textContent = parent.name;
+            option.dataset.children = JSON.stringify(parent.children);
             selectElement.appendChild(option);
         });
+        console.log('✅ populateParentSelect CascadeType: ', cascadeType);
 
-        // Восстанавливаем выбранное значение
-        if (currentValue && Array.from(selectElement.options).some(opt => opt.value === currentValue)) {
-            selectElement.value = currentValue;
-            this.updateChildSelect(selectElement);
+        const firstName = cascadeType === 'poet_poem' ? 'Автор (поэт)' : 'Стили';
+
+        var opt = new Option(firstName, firstName);
+        selectElement.insertBefore(opt, selectElement.firstChild);
+      
+        console.log('✅ Parent select populated with', parents.length, 'options');
+
+        // ⭐⭐⭐ АВТОВЫБОР ПЕРВОГО РОДИТЕЛЯ ⭐⭐⭐
+        if (parents.length > 0) {
+            //Выбираем первого родителя
+            //HACK recomment
+            //selectElement.value = parents[0].id;
+            //console.log('✅ Auto-selected first parent:', parents[0].name);
+
+            //HACK test
+            selectElement.value = `${firstName}`;
+            console.log('✅ Auto-selected first select: ', `${firstName}`);
+            //Немедленно обновляем дочерний селект
+            this.updateChildSelect(selectElement, cascadeType);
         }
     }
 
-    updateChildSelect(parentSelect) {
+    updateChildSelect(parentSelect, cascadeType) {
+        console.log('🔄 updateChildSelect called for value:', parentSelect.value);
         const container = parentSelect.closest('.cascade-container');
         const childSelect = container.querySelector('.cascade-child');
-        const sunoPromptContainer = container.querySelector('.suno-prompt-container');
         const selectedOption = parentSelect.options[parentSelect.selectedIndex];
 
         // Сбрасываем дочерний селект
-        childSelect.innerHTML = '<option value="">-- Выберите значение --</option>';
+        childSelect.innerHTML = '';
         childSelect.disabled = true;
+        console.log('✅ cascadeType: ', cascadeType);
 
-        // Скрываем suno prompt
-        if (sunoPromptContainer) {
-            sunoPromptContainer.style.display = 'none';
+        const firstName = cascadeType === 'poet_poem' ? 'Стих' : 'Стиль';
+        console.log('✅ firstName: ', firstName);
+        childSelect.innerHTML = `<option value="">-- ${firstName} --</option>`;
+        console.log('✅ updateChildSelect CascadeType:', cascadeType);
+        const noElements = cascadeType === 'poet_poem' ? 'Выберите поэта' : 'Выберите стиль';
+        console.log('✅ noElements: ', noElements);
+
+        if (!selectedOption?.value) {
+            console.log('❌ No category selected');
+            return;
         }
 
-        if (!selectedOption || !selectedOption.value) return;
-
         const children = JSON.parse(selectedOption.dataset.children || '[]');
+        console.log('📝 Children to add:', children.length);
 
         if (children.length > 0) {
             children.forEach(child => {
                 const option = document.createElement('option');
                 option.value = child.id;
                 option.textContent = child.name;
-                
+
                 if (child.suno_prompt) {
                     option.dataset.sunoPrompt = child.suno_prompt;
                 }
-                
+
                 childSelect.appendChild(option);
             });
-            
-            childSelect.disabled = false;
 
-            // Автовыбор первого элемента
+            childSelect.disabled = false;
+            console.log('✅ Child select populated with', children.length, 'items');
+
+            // ⭐⭐⭐ АВТОВЫБОР ПЕРВОГО РЕБЕНКА ⭐⭐⭐
             if (children.length > 0) {
                 childSelect.value = children[0].id;
-                this.updateSunoPrompt(childSelect);
+                console.log('✅ Auto-selected first child:', children[0].name);
+
+                // Триггерим событие для suno_prompt
+                childSelect.dispatchEvent(new Event('change'));
             }
-        }
-    }
 
-    updateSunoPrompt(childSelect) {
-        const container = childSelect.closest('.cascade-container');
-        const sunoPromptContainer = container.querySelector('.suno-prompt-container');
-        const sunoPromptText = container.querySelector('.suno-prompt-text');
-        const showSunoPrompt = container.dataset.showSunoPrompt === 'true';
-
-        if (!showSunoPrompt || !sunoPromptContainer || !sunoPromptText) return;
-
-        const selectedOption = childSelect.options[childSelect.selectedIndex];
-        const promptText = selectedOption?.dataset.sunoPrompt || '';
-
-        if (promptText) {
-            sunoPromptText.textContent = promptText;
-            sunoPromptContainer.style.display = 'block';
         } else {
-            sunoPromptContainer.style.display = 'none';
+            childSelect.innerHTML = `<option value="">-- ${noElements} --</option>`;
         }
-    }
-
-    getSelectedValues(container) {
-        const parentSelect = container.querySelector('.cascade-parent');
-        const childSelect = container.querySelector('.cascade-child');
-        
-        const parentOption = parentSelect.options[parentSelect.selectedIndex];
-        const childOption = childSelect.options[childSelect.selectedIndex];
-
-        return {
-            parent_id: parentSelect.value,
-            parent_name: parentOption?.text || '',
-            child_id: childSelect.value,
-            child_name: childOption?.text || '',
-            suno_prompt: childOption?.dataset.sunoPrompt || ''
-        };
-    }
-
-    reset(container) {
-        const parentSelect = container.querySelector('.cascade-parent');
-        const childSelect = container.querySelector('.cascade-child');
-
-        if (parentSelect) parentSelect.value = '';
-        if (childSelect) {
-            childSelect.innerHTML = '<option value="">-- Выберите значение --</option>';
-            childSelect.disabled = true;
-        }
-
-        const sunoPromptContainer = container.querySelector('.suno-prompt-container');
-        if (sunoPromptContainer) {
-            sunoPromptContainer.style.display = 'none';
-        }
-    }
-
-    clearCache(type = null) {
-        if (type) {
-            this.cache.delete(type);
-        } else {
-            this.cache.clear();
-        }
-    }
-
-    async refresh(type) {
-        this.clearCache(type);
-        
-        const containers = type 
-            ? Array.from(this.containers).filter(c => c.dataset.cascadeType === type)
-            : this.containers;
-
-        await Promise.all(Array.from(containers).map(c => this.loadCascadeData(c)));
-    }
-
-    static initAll() {
-        if (!window.cascadeManager) {
-            window.cascadeManager = new CascadeManager();
-        }
-        return window.cascadeManager;
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    CascadeManager.initAll();
+// Используем уникальное имя для глобальной переменной
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('✅ DOM Ready - initializing CascadeSelectManager');
+    window.cascadeSelectManager = new CascadeSelectManager();
 });
+
