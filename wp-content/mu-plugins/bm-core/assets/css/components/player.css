@@ -1,0 +1,48 @@
+.player {
+    background: var(--color-background-alt);
+    border-radius: 8px;
+    padding: var(--spacing-md);
+}
+
+.player audio {
+    width: 100%;
+}
+
+.player-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+}
+
+.player-play {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-lg);
+}
+
+.player-progress {
+    flex: 1;
+    height: 6px;
+    background: var(--color-border);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.player-progress-bar {
+    height: 100%;
+    background: var(--color-primary);
+    width: 0;
+    transition: width 0.1s linear;
+}
+
+.player-time {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+}
