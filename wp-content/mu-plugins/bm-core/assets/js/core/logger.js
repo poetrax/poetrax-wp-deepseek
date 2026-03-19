@@ -19,6 +19,11 @@ const Logger = {
     
     error: (error, context = {}) => {
         console.error('[BM]', error, context);
+        
+        // Отправка ошибки на сервер (опционально)
+        if (window.BM_SENTRY_DSN) {
+            // интеграция с Sentry
+        }
     }
 };
 
