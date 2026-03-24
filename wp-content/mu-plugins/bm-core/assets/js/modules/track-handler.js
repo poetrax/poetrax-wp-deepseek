@@ -2,6 +2,10 @@
  * Track Handler Module
  * Обработка параметров трека в URL и загрузка данных
  */
+// Проверяем, что ApiClient загружен
+if (!window.ApiClient) {
+    console.error('ApiClient not loaded');
+}
 
 class TrackHandler {
     constructor(options = {}) {

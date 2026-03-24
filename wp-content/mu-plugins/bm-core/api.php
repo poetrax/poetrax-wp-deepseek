@@ -36,3 +36,23 @@ $router->delete('/api/tracks/{id}/like', [TrackController::class, 'unlike']);
 // ============================================
 
 $router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
+
+$router->post('/api/filter/tracks', [FilterController::class, 'filter']);
+$router->post('/api/filter/poets', [FilterController::class, 'filter']);
+$router->post('/api/filter/poems', [FilterController::class, 'filter']);
+$router->post('/api/filter/users', [FilterController::class, 'filter']);
+$router->get('/api/filter/{entity}/available', [FilterController::class, 'availableFilters']);
+
+// Фильтрация сущностей через свойства треков
+$router->post('/api/filter/poets/by-track-properties', [FilterController::class, 'filterPoetsByTrackProperties']);
+$router->post('/api/filter/poems/by-track-properties', [FilterController::class, 'filterPoemsByTrackProperties']);
+$router->post('/api/filter/users/by-track-properties', [FilterController::class, 'filterUsersByTrackProperties']);
+
+// Рекомендации
+$router->get('/api/recommendations/user', [RecommendationController::class, 'forUser']);
+$router->get('/api/recommendations/track/{id}', [RecommendationController::class, 'similarToTrack']);
+$router->get('/api/recommendations/popular', [RecommendationController::class, 'popular']);
+$router->get('/api/recommendations/new', [RecommendationController::class, 'newReleases']);
+$router->get('/api/recommendations/trending', [RecommendationController::class, 'trending']);
+$router->get('/api/recommendations/poet/{id}', [RecommendationController::class, 'forPoet']);
+$router->get('/api/recommendations/poem/{id}', [RecommendationController::class, 'forPoem']);

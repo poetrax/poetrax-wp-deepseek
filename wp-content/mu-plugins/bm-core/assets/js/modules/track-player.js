@@ -38,42 +38,48 @@ class TrackPlayer {
         document.addEventListener('bm:rate-change', (e) => this.setPlaybackRate(e.detail.rate));
     }
 
-    playTrack({ trackId, trackUrl, cardElement, autoplay = true }) {
-        // Если тот же трек — просто переключаем play/pause
-        if (this.currentTrackId === trackId) {
-            if (this.isPlaying) {
-                this.pause();
-            } else {
-                this.play();
-            }
-            return;
-        }
-
-        // Новый трек
-        const wasPlaying = this.isPlaying;
-        this.stop(); // останавливаем предыдущий
-        
-        this.currentTrackId = trackId;
-        this.audio.src = trackUrl;
-        this.audio.load();
-        
-        // Записываем прослушивание в API
-        if (window.ApiClient) {
-            window.ApiClient.tracks.play(trackId, 0).catch(console.error);
-        }
-        
-        if (autoplay) {
+    async playTrack({ trackId, trackUrl, cardElement, autoplay = true }) {
+    // Если тот же трек — просто переключаем play/pause
+    if (this.currentTrackId === trackId) {
+        if (this.isPlaying) {
+            this.pause();
+        } else {
             this.play();
         }
-        
-        // Обновляем UI через классы
-        this.updatePlayingIndicator(cardElement);
-        
-        // Диспатчим событие о смене трека
-        document.dispatchEvent(new CustomEvent('bm:track-changed', {
-            detail: { trackId, trackUrl, wasPlaying }
-        }));
+        return;
     }
+
+    // Новый трек
+    this.stop(); // останавливаем предыдущий
+    
+    this.currentTrackId = trackId;
+    
+    // Получаем защищённую ссылку на стрим
+    if (window.ApiClient) {
+        try {
+            const streamUrl = await ApiClient.getStreamUrl(trackId);
+            this.audio.src = streamUrl;
+        } catch (error) {
+            console.error('Failed to get stream URL:', error);
+            // Fallback на прямую ссылку (если API не работает)
+            this.audio.src = trackUrl;
+        }
+    } else {
+        this.audio.src = trackUrl;
+    }
+    
+    this.audio.load();
+    
+    // Записываем прослушивание в API
+    if (window.ApiClient) {
+        window.ApiClient.tracks.play(trackId, 0).catch(console.error);
+    }
+    
+    if (autoplay) {
+        this.play();
+    }
+}
+
 
     play() {
         this.audio.play()
