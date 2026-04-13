@@ -3,6 +3,7 @@ namespace BM\Core\Database;
 
 use PDO;
 use PDOException;
+use Exception;
 
 class Connection
 {
@@ -10,44 +11,34 @@ class Connection
     private $pdo;
     private $config;
 
-    private function __construct($config)
+    private function __construct($config = null)
     {
-        $this->config = $config;
+        $this->config = $config ?: [
+            'host' => getenv('DB_HOST') ?: 'poetrax_deepseek_mysql',
+            'database' => getenv('DB_NAME') ?: 'u3436142_poetrax_deepseek_db',
+            'username' => getenv('DB_USER') ?: 'u3436142_poetrax_deepseek_user',
+            'password' => getenv('DB_PASSWORD') ?: 'CI57bdR7m6F9Xem7',
+        ];
         $this->connect();
-    }
-
-    public static function getInstance($config = null)
-    {
-        if (self::$instance === null) {
-            $config = $config ?: require __DIR__ . '/../Config/database.php';
-            self::$instance = new self($config['connections'][$config['default']]);
-        }
-        return self::$instance;
     }
 
     private function connect()
     {
         try {
-            $dsn = sprintf(
-                'mysql:host=%s;dbname=%s;charset=%s',
-                $this->config['host'],
-                $this->config['database'],
-                $this->config['charset']
-            );
-            
-            $this->pdo = new PDO(
-                $dsn,
-                $this->config['username'],
-                $this->config['password'],
-                [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
-                    PDO::ATTR_EMULATE_PREPARES => false,
-                ]
-            );
+            $dsn = "mysql:host={$this->config['host']};dbname={$this->config['database']};charset=utf8mb4";
+            $this->pdo = new PDO($dsn, $this->config['username'], $this->config['password']);
+            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
-            throw new \Exception('Database connection failed: ' . $e->getMessage());
+            throw new Exception("Database connection failed: " . $e->getMessage());
         }
+    }
+
+    public static function getInstance($config = null)
+    {
+        if (self::$instance === null) {
+            self::$instance = new self($config);
+        }
+        return self::$instance;
     }
 
     public function getPdo()
@@ -64,22 +55,19 @@ class Connection
 
     public function fetchAll($sql, $params = [])
     {
-        return $this->query($sql, $params)->fetchAll();
+        return $this->query($sql, $params)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function fetchOne($sql, $params = [])
     {
-        return $this->query($sql, $params)->fetch();
+        return $this->query($sql, $params)->fetch(PDO::FETCH_ASSOC);
     }
 
     public function insert($table, $data)
     {
-        $fields = array_keys($data);
-        $placeholders = ':' . implode(', :', $fields);
-        
-        $sql = "INSERT INTO {$table} (" . implode(', ', $fields) . ") 
-                VALUES ({$placeholders})";
-        
+        $columns = implode(', ', array_keys($data));
+        $placeholders = ':' . implode(', :', array_keys($data));
+        $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
         $this->query($sql, $data);
         return $this->pdo->lastInsertId();
     }
@@ -87,31 +75,17 @@ class Connection
     public function update($table, $data, $where)
     {
         $set = [];
-        foreach (array_keys($data) as $field) {
-            $set[] = "{$field} = :{$field}";
+        foreach ($data as $key => $value) {
+            $set[] = "{$key} = :{$key}";
         }
-        
-        $whereClause = [];
-        foreach (array_keys($where) as $field) {
-            $whereClause[] = "{$field} = :where_{$field}";
-            $data["where_{$field}"] = $where[$field];
-        }
-        
-        $sql = "UPDATE {$table} SET " . implode(', ', $set) . 
-               " WHERE " . implode(' AND ', $whereClause);
-        
+        $setStr = implode(', ', $set);
+        $sql = "UPDATE {$table} SET {$setStr} WHERE {$where}";
         return $this->query($sql, $data)->rowCount();
     }
 
     public function delete($table, $where)
     {
-        $whereClause = [];
-        foreach (array_keys($where) as $field) {
-            $whereClause[] = "{$field} = :{$field}";
-        }
-        
-        $sql = "DELETE FROM {$table} WHERE " . implode(' AND ', $whereClause);
-        
-        return $this->query($sql, $where)->rowCount();
+        $sql = "DELETE FROM {$table} WHERE {$where}";
+        return $this->query($sql)->rowCount();
     }
 }

@@ -1,0 +1,2 @@
+RewriteEngine On
+RewriteRule ^api/(.*)$ wp-content/mu-plugins/bm-core/api.php [QSA,L]

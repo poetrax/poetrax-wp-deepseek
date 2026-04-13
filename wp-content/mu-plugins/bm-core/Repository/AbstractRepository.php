@@ -2,98 +2,57 @@
 namespace BM\Core\Repository;
 
 use BM\Core\Database\Connection;
-use BM\Core\Exceptions\DatabaseException;
 
 abstract class AbstractRepository
 {
     protected $connection;
-    protected $table;
-    protected $primaryKey = 'id';
+    protected $tableName;
 
     public function __construct()
     {
         $this->connection = Connection::getInstance();
-        $this->table = $this->connection->table($this->getTableName());
     }
 
     abstract protected function getTableName(): string;
 
     public function find($id)
     {
-        $sql = "SELECT * FROM {$this->table} WHERE {$this->primaryKey} = :id LIMIT 1";
-        return $this->connection->fetchOne($sql, ['id' => $id]);
+        $table = $this->getTableName();
+        $sql = "SELECT * FROM {$table} WHERE id = ?";
+        return $this->connection->fetchOne($sql, [$id]);
     }
 
-    public function findAll($limit = 100, $offset = 0)
+    public function findAll()
     {
-        $sql = "SELECT * FROM {$this->table} LIMIT :limit OFFSET :offset";
-        return $this->connection->fetchAll($sql, [
-            'limit' => $limit,
-            'offset' => $offset
-        ]);
+        $table = $this->getTableName();
+        $sql = "SELECT * FROM {$table}";
+        return $this->connection->fetchAll($sql);
     }
 
-    public function findBy(array $conditions, $limit = null, $orderBy = null)
+    public function findBy($field, $value)
     {
-        $where = [];
-        $params = [];
-        foreach ($conditions as $field => $value) {
-            $where[] = "{$field} = :{$field}";
-            $params[$field] = $value;
-        }
-        
-        $sql = "SELECT * FROM {$this->table} WHERE " . implode(' AND ', $where);
-        
-        if ($orderBy) {
-            $sql .= " ORDER BY {$orderBy}";
-        }
-        
-        if ($limit) {
-            $sql .= " LIMIT :limit";
-            $params['limit'] = $limit;
-        }
-        
-        return $this->connection->fetchAll($sql, $params);
+        $table = $this->getTableName();
+        $sql = "SELECT * FROM {$table} WHERE {$field} = ?";
+        return $this->connection->fetchAll($sql, [$value]);
     }
 
-    public function create(array $data)
+    public function create($data)
     {
-        return $this->connection->insert($this->getTableName(), $data);
+        $table = $this->getTableName();
+        return $this->connection->insert($table, $data);
     }
 
-    public function update($id, array $data)
+    public function update($id, $data)
     {
-        return $this->connection->update(
-            $this->getTableName(),
-            $data,
-            [$this->primaryKey => $id]
-        );
+        $table = $this->getTableName();
+        $where = "id = {$id}";
+        return $this->connection->update($table, $data, $where);
     }
 
     public function delete($id)
     {
-        return $this->connection->delete(
-            $this->getTableName(),
-            [$this->primaryKey => $id]
-        );
-    }
-
-    public function count(array $conditions = [])
-    {
-        if (empty($conditions)) {
-            $sql = "SELECT COUNT(*) as total FROM {$this->table}";
-            return $this->connection->fetchOne($sql)->total;
-        }
-        
-        $where = [];
-        $params = [];
-        foreach ($conditions as $field => $value) {
-            $where[] = "{$field} = :{$field}";
-            $params[$field] = $value;
-        }
-        
-        $sql = "SELECT COUNT(*) as total FROM {$this->table} WHERE " . implode(' AND ', $where);
-        
-        return $this->connection->fetchOne($sql, $params)->total;
+        $table = $this->getTableName();
+        $where = "id = {$id}";
+        return $this->connection->delete($table, $where);
     }
 }

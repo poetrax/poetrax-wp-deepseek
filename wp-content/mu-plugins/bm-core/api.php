@@ -6,7 +6,9 @@ namespace BM\Core;
 use BM\Core\Controller\TrackController;
 
 // Загружаем автозагрузчик
-require_once __DIR__ . '/../../../../vendor/autoload.php';
+
+require_once '/var/www/html/vendor/autoload.php';
+
 
 // Запускаем сессию для авторизации
 if (session_status() === PHP_SESSION_NONE) {

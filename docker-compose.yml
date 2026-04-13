@@ -1,87 +1,90 @@
 version: '3.8'
 
 services:
-  db:
+  mysql-claude:
     image: mysql:8
-    container_name: poetrax_db
+    container_name: poetrax_claude_mysql
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: poetrax
-      MYSQL_USER: poetrax
-      MYSQL_PASSWORD: ${DB_PASSWORD:-changeme}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
-    volumes:
-      - db_data:/var/lib/mysql
+      MYSQL_DATABASE: ${CLAUDE_DB_NAME}
+      MYSQL_USER: ${CLAUDE_DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     ports:
-      - "3306:3306"
+      - "${CLAUDE_MYSQL_PORT}:3306"
+    volumes:
+      - mysql_claude_data:/var/lib/mysql
     networks:
       - poetrax_network
 
-  wordpress-claude:
-    image: wordpress:6-php8.2-apache
-    container_name: poetrax_wp_claude
+  mysql-deepseek:
+    image: mysql:8
+    container_name: poetrax_deepseek_mysql
     restart: unless-stopped
-    ports:
-      - "8080:80"
     environment:
-      WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_USER: poetrax
-      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-changeme}
-      WORDPRESS_DB_NAME: poetrax
-      WORDPRESS_DEBUG: 1
-      VIRTUAL_HOST: poetrax-local.online  # для локального домена
+      MYSQL_DATABASE: ${DEEPSEEK_DB_NAME}
+      MYSQL_USER: ${DEEPSEEK_DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "${DEEPSEEK_MYSQL_PORT}:3306"
     volumes:
-      - ./wp-content/themes/poetrax:/var/www/html/wp-content/themes/poetrax
-      - ./wp-content/plugins:/var/www/html/wp-content/plugins
-      - ./wp-content/mu-plugins:/var/www/html/wp-content/mu-plugins
-      - ./wp-content/uploads:/var/www/html/wp-content/uploads
-      - ./php.ini:/usr/local/etc/php/conf.d/php.ini
-    depends_on:
-      - db
+      - mysql_deepseek_data:/var/lib/mysql
     networks:
       - poetrax_network
 
-  wordpress-deepseek:
-    image: wordpress:6-php8.2-apache
-    container_name: poetrax_wp_deepseek
-    restart: unless-stopped
-    ports:
-      - "8082:80"
-    environment:
-      WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_USER: poetrax
-      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-changeme}
-      WORDPRESS_DB_NAME: poetrax_deepseek
-      WORDPRESS_DEBUG: 1
-      VIRTUAL_HOST: poetrax-local.ru
-    volumes:
-      - ../poetrax-wp-deepseek/wp-content/themes/poetrax:/var/www/html/wp-content/themes/poetrax
-      - ../poetrax-wp-deepseek/wp-content/plugins:/var/www/html/wp-content/plugins
-      - ../poetrax-wp-deepseek/wp-content/uploads:/var/www/html/wp-content/uploads
-      - ./php.ini:/usr/local/etc/php/conf.d/php.ini
-    depends_on:
-      - db
-    networks:
-      - poetrax_network
-
-  phpmyadmin:
+  phpmyadmin-claude:
     image: phpmyadmin/phpmyadmin
-    container_name: poetrax_pma
+    container_name: poetrax_claude_pma
     restart: unless-stopped
     ports:
-      - "8081:80"
+      - "${CLAUDE_PMA_PORT}:80"
     environment:
-      PMA_HOST: db
-      PMA_USER: poetrax
-      PMA_PASSWORD: ${DB_PASSWORD:-changeme}
-      UPLOAD_LIMIT: 128M
+      PMA_HOST: mysql-claude
+      PMA_USER: ${CLAUDE_DB_USER}
+      PMA_PASSWORD: ${DB_PASSWORD}
     depends_on:
-      - db
+      - mysql-claude
     networks:
       - poetrax_network
 
-volumes:
-  db_data:
+  phpmyadmin-deepseek:
+    image: phpmyadmin/phpmyadmin
+    container_name: poetrax_deepseek_pma
+    restart: unless-stopped
+    ports:
+      - "${DEEPSEEK_PMA_PORT}:80"
+    environment:
+      PMA_HOST: mysql-deepseek
+      PMA_USER: ${DEEPSEEK_DB_USER}
+      PMA_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      - mysql-deepseek
+    networks:
+      - poetrax_network
+
+  php-app:
+    build: .
+    container_name: poetrax_deepseek_wp
+    restart: unless-stopped
+    ports:
+      - "8086:80"
+    volumes:
+      - .:/var/www/html
+    networks:
+      - poetrax_network
+    depends_on:
+      - mysql-deepseek
+    environment:
+      DB_HOST: mysql-deepseek
+      DB_NAME: ${DEEPSEEK_DB_NAME}
+      DB_USER: ${DEEPSEEK_DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
 
 networks:
   poetrax_network:
+    driver: bridge
+
+volumes:
+  mysql_claude_data:
+  mysql_deepseek_data:

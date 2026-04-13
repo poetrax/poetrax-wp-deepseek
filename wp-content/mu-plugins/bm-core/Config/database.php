@@ -1,13 +1,14 @@
 <?php
+
 return [
     'default' => 'mysql',
     'connections' => [
         'mysql' => [
             'driver'    => 'mysql',
-            'host'      => 'localhost',
-            'database'  => 'u3436142_ru',
-            'username'  => 'u3436142_default',
-            'password'  =>getenv('DB_PASSWORD'),
+            'host'      => 'poetrax_deepseek_mysql',
+            'database'  => 'u3436142_poetrax_deepseek_db',
+            'username'  => 'u3436142_poetrax_deepseek_user',
+            'password'  => getenv('DB_PASSWORD'),
             'charset'   => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
         ],

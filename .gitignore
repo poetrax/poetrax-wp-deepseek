@@ -55,4 +55,4 @@ desktop.ini
 
 # Node (если вдруг)
 node_modules/
-package-lock.json
+package-lock.json.env
