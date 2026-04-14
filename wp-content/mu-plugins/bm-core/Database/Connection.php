@@ -8,84 +8,79 @@ use Exception;
 class Connection
 {
     private static $instance = null;
-    private $pdo;
+    private static $pdo = null;
     private $config;
 
-    private function __construct($config = null)
+    private function __construct(array $config)
     {
-        $this->config = $config ?: [
-            'host' => getenv('DB_HOST') ?: 'poetrax_deepseek_mysql',
-            'database' => getenv('DB_NAME') ?: 'u3436142_poetrax_deepseek_db',
-            'username' => getenv('DB_USER') ?: 'u3436142_poetrax_deepseek_user',
-            'password' => getenv('DB_PASSWORD') ?: 'CI57bdR7m6F9Xem7',
-        ];
+        $required = ['host', 'database', 'username', 'password'];
+        foreach ($required as $key) {
+            if (empty($config[$key])) {
+                throw new Exception("Database configuration missing: {$key}");
+            }
+        }
+        $this->config = $config;
         $this->connect();
     }
 
-    private function connect()
+    private function connect(): void
     {
         try {
-            $dsn = "mysql:host={$this->config['host']};dbname={$this->config['database']};charset=utf8mb4";
-            $this->pdo = new PDO($dsn, $this->config['username'], $this->config['password']);
-            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $dsn = sprintf(
+                'mysql:host=%s;dbname=%s;charset=utf8mb4',
+                $this->config['host'],
+                $this->config['database']
+            );
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ];
+            self::$pdo = new PDO($dsn, $this->config['username'], $this->config['password'], $options);
         } catch (PDOException $e) {
-            throw new Exception("Database connection failed: " . $e->getMessage());
+            throw new Exception('Database connection failed: ' . $e->getMessage(), (int) $e->getCode(), $e);
         }
     }
 
-    public static function getInstance($config = null)
+    public static function getInstance(?array $config = null): self
     {
         if (self::$instance === null) {
+            if ($config === null) {
+                throw new Exception('Database configuration required for first initialization');
+            }
             self::$instance = new self($config);
+        }
+        try {
+            self::$pdo->query('SELECT 1');
+        } catch (PDOException $e) {
+            self::$instance->connect();
         }
         return self::$instance;
     }
 
-    public function getPdo()
+    public static function getPDO(): PDO
     {
-        return $this->pdo;
-    }
-
-    public function query($sql, $params = [])
-    {
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($params);
-        return $stmt;
-    }
-
-    public function fetchAll($sql, $params = [])
-    {
-        return $this->query($sql, $params)->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function fetchOne($sql, $params = [])
-    {
-        return $this->query($sql, $params)->fetch(PDO::FETCH_ASSOC);
-    }
-
-    public function insert($table, $data)
-    {
-        $columns = implode(', ', array_keys($data));
-        $placeholders = ':' . implode(', :', array_keys($data));
-        $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
-        $this->query($sql, $data);
-        return $this->pdo->lastInsertId();
-    }
-
-    public function update($table, $data, $where)
-    {
-        $set = [];
-        foreach ($data as $key => $value) {
-            $set[] = "{$key} = :{$key}";
+        if (self::$pdo === null) {
+            throw new Exception('Database not initialized. Call getInstance() first.');
         }
-        $setStr = implode(', ', $set);
-        $sql = "UPDATE {$table} SET {$setStr} WHERE {$where}";
-        return $this->query($sql, $data)->rowCount();
+        return self::$pdo;
     }
 
-    public function delete($table, $where)
+    public static function checkConnection(): bool
     {
-        $sql = "DELETE FROM {$table} WHERE {$where}";
-        return $this->query($sql)->rowCount();
+        if (self::$pdo === null) {
+            throw new Exception('No database connection');
+        }
+        try {
+            self::$pdo->query('SELECT 1');
+        } catch (PDOException $e) {
+            throw new Exception('Database connection lost: ' . $e->getMessage(), (int) $e->getCode(), $e);
+        }
+        return true;
+    }
+
+    public function __destruct()
+    {
+        self::$pdo = null;
     }
 }

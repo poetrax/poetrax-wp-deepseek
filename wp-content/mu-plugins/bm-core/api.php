@@ -1,14 +1,36 @@
 <?php
-// api.php - единая точка входа для API
 
 namespace BM\Core;
 
 use BM\Core\Controller\TrackController;
+require_once __DIR__ . '/vendor/autoload.php';
 
-// Загружаем автозагрузчик
+use BM\Core\Config;
+use BM\Core\Database\Connection;
+use BM\Core\Database\Cache;
+use BM\Core\Database\Loader;
 
-require_once '/var/www/html/vendor/autoload.php';
+Config::load(__DIR__ . '/config.php');
 
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+$dbConfig = [
+    'host' => $_ENV['DEEPSEEK_DB_HOST'],
+    'database' => $_ENV['DEEPSEEK_DB_NAME'],
+    'username' => $_ENV['DEEPSEEK_DB_USER'],
+    'password' => $_ENV['DB_PASSWORD'],
+];
+
+$connection = Connection::getInstance($dbConfig);
+$cache = Cache::getInstance();
+$loader = new Loader($connection, $cache);
+
+$warmupTtl = Config::get('cache.warmup_ttl');
+if (!$cache->has('table:warmed_up')) {
+    $loader->warmupCache();
+    $cache->set('table:warmed_up', time(), $warmupTtl);
+}
 
 // Запускаем сессию для авторизации
 if (session_status() === PHP_SESSION_NONE) {
