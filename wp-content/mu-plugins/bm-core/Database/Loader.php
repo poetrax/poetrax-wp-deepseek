@@ -1,7 +1,6 @@
 <?php
 namespace BM\Core\Database;
 
-use BM\Core\Config;
 use PDO;
 use PDOException;
 
@@ -12,14 +11,16 @@ class Loader
     private int $dictionaryRowLimit;
     private int $cacheRowLimit;
     private int $cacheTtl;
-
-    public function __construct(Connection $connection, Cache $cache)
+	private array $config;
+ 
+    public function __construct(Connection $connection, Cache $cache, array $config)
     {
         $this->connection = $connection;
         $this->cache = $cache;
-        $this->dictionaryRowLimit = Config::get('database.dictionary_row_limit', 1000);
-        $this->cacheRowLimit = Config::get('database.cache_row_limit', 5000);
-        $this->cacheTtl = Config::get('cache.ttl', 3600);
+ 		$this->config = $config;
+		$this->dictionaryRowLimit = $this->config['database']['dictionary_row_limit'] ?? 1000;
+		$this->cacheRowLimit = $this->config['database']['cache_row_limit'] ?? 5000;
+		$this->cacheTtl = $this->config['cache']['ttl'] ?? 3600;
     }
 
     public function loadAllTables(): void

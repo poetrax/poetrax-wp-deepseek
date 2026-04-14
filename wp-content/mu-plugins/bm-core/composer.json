@@ -1,0 +1,8 @@
+{
+    "name": "poetrax/bm-core",
+    "autoload": {
+        "psr-4": {
+            "BM\\Core\\": ""
+        }
+    }
+}
