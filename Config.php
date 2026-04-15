@@ -9,4 +9,17 @@ return [
         'prefix' => 'poetrax_',
         'warmup_ttl' => 86400,
     ],
+    'pagination' => [
+        'default_page' => 1,
+        'default_limit' => 20,
+        'max_limit' => 100,
+    ],
+	'track' => [
+    'fields' => [
+        'is_approved' => 'is_approved',
+        'is_active' => 'is_active',
+        'created_at' => 'created_at',
+    ],
+    'recent_limit' => 10,
+	],
 ];

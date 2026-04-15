@@ -1,10 +1,8 @@
 <?php
 //namespace BM\Core;
 //use BM\Core\Controller\TrackController;
-
 require_once __DIR__ . '/vendor/autoload.php';
-
-ob_start(); // буферизация вывода
+ob_start();
 
 $config = require __DIR__ . '/Config.php';
 
@@ -23,6 +21,10 @@ $dbConfig = [
 use BM\Core\Database\Connection;
 use BM\Core\Database\Cache;
 use BM\Core\Database\Loader;
+use BM\Core\Router;
+use BM\Core\Controller\TrackController;
+use BM\Core\Controller\FilterController;
+use BM\Core\Controller\RecommendationController;
 
 $connection = Connection::getInstance($dbConfig);
 $cache = Cache::getInstance();
@@ -34,21 +36,16 @@ if (!$cache->has('table:warmed_up')) {
     $cache->set('table:warmed_up', time(), $warmupTtl);
 }
 
-// Запускаем сессию для авторизации
+// Сессии (опционально)
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-if ($_SERVER['REQUEST_URI'] === '/api/tracks') {
-    header('Content-Type: application/json');
-}
 
-// Создаём роутер
+// ============================================
+// РОУТЕР
+// ============================================
 $router = new Router();
-
-// ============================================
-// API маршруты
-// ============================================
 
 // Треки
 $router->get('/api/tracks', [TrackController::class, 'index']);
@@ -61,19 +58,12 @@ $router->post('/api/tracks/{id}/play', [TrackController::class, 'play']);
 $router->post('/api/tracks/{id}/like', [TrackController::class, 'like']);
 $router->delete('/api/tracks/{id}/like', [TrackController::class, 'unlike']);
 
-// ============================================
-// Запуск
-// ============================================
-
-$router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
-
+// Фильтры
 $router->post('/api/filter/tracks', [FilterController::class, 'filter']);
 $router->post('/api/filter/poets', [FilterController::class, 'filter']);
 $router->post('/api/filter/poems', [FilterController::class, 'filter']);
 $router->post('/api/filter/users', [FilterController::class, 'filter']);
 $router->get('/api/filter/{entity}/available', [FilterController::class, 'availableFilters']);
-
-// Фильтрация сущностей через свойства треков
 $router->post('/api/filter/poets/by-track-properties', [FilterController::class, 'filterPoetsByTrackProperties']);
 $router->post('/api/filter/poems/by-track-properties', [FilterController::class, 'filterPoemsByTrackProperties']);
 $router->post('/api/filter/users/by-track-properties', [FilterController::class, 'filterUsersByTrackProperties']);
@@ -86,3 +76,8 @@ $router->get('/api/recommendations/new', [RecommendationController::class, 'newR
 $router->get('/api/recommendations/trending', [RecommendationController::class, 'trending']);
 $router->get('/api/recommendations/poet/{id}', [RecommendationController::class, 'forPoet']);
 $router->get('/api/recommendations/poem/{id}', [RecommendationController::class, 'forPoem']);
+
+// Запуск
+$router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
+
+

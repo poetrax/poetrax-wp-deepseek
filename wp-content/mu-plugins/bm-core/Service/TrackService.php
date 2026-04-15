@@ -12,14 +12,22 @@ class TrackService
     private PoetRepository $poetRepo;
     private PoemRepository $poemRepo;
     private InteractionRepository $interactionRepo;
+	private $config;  
 
-    public function __construct()
-    {
-        $this->trackRepo = new TrackRepository();
-        $this->poetRepo = new PoetRepository();
-        $this->poemRepo = new PoemRepository();
-        $this->interactionRepo = new InteractionRepository();
-    }
+   public function __construct($config = null)
+	{
+    $this->config = $config;
+    $this->trackRepo = new TrackRepository($config);
+    $this->poetRepo = new PoetRepository();
+    $this->poemRepo = new PoemRepository();
+    $this->interactionRepo = new InteractionRepository();
+	}
+		
+
+	public function getTrackRepo()
+	{
+		return $this->trackRepo;
+	}
 
     /**
      * Получить трек со всей связанной информацией

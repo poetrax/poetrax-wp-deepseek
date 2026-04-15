@@ -23,8 +23,8 @@ class TrackController extends BaseController
         $page = (int) ($this->getParam('page', 1));
         $limit = (int) ($this->getParam('limit', 20));
         
-        $tracks = $this->trackService->trackRepo->getPaginated($page, $limit);
-        $total = $this->trackService->trackRepo->count();
+        $tracks = $this->trackService->getTrackRepo()->getPaginated($page, $limit);
+        $total = $this->trackService->getTrackRepo()->count();
 
         return $this->jsonSuccess([
             'items' => $tracks,
