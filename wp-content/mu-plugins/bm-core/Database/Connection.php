@@ -3,7 +3,6 @@ namespace BM\Core\Database;
 
 use PDO;
 use PDOException;
-use Exception;
 
 class Connection
 {
@@ -37,7 +36,7 @@ class Connection
                 PDO::ATTR_EMULATE_PREPARES => false,
             ];
             self::$pdo = new PDO($dsn, $this->config['username'], $this->config['password'], $options);
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             throw new Exception('Database connection failed: ' . $e->getMessage(), (int) $e->getCode(), $e);
         }
     }
@@ -52,7 +51,7 @@ class Connection
         }
         try {
             self::$pdo->query('SELECT 1');
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             self::$instance->connect();
         }
         return self::$instance;
@@ -73,7 +72,7 @@ class Connection
         }
         try {
             self::$pdo->query('SELECT 1');
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             throw new Exception('Database connection lost: ' . $e->getMessage(), (int) $e->getCode(), $e);
         }
         return true;

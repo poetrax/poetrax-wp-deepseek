@@ -37,8 +37,8 @@ class Loader
             foreach ($tables as $tableInfo) {
                 $this->loadTable($tableInfo['TABLE_NAME'], (int) $tableInfo['TABLE_ROWS']);
             }
-        } catch (PDOException $e) {
-            throw new PDOException("Failed to load tables: " . $e->getMessage(), (int) $e->getCode(), $e);
+        } catch (\PDOException $e) {
+            throw new \PDOException("Failed to load tables: " . $e->getMessage(), (int) $e->getCode(), $e);
         }
     }
 
@@ -53,8 +53,8 @@ class Loader
                 $data = $pdo->query("SELECT * FROM {$table} LIMIT {$this->cacheRowLimit}")->fetchAll(PDO::FETCH_ASSOC);
                 $this->cache->set("table:{$table}:sample", $data, $this->cacheTtl);
             }
-        } catch (PDOException $e) {
-            throw new PDOException("Failed to load table '{$table}': " . $e->getMessage(), (int) $e->getCode(), $e);
+        } catch (\PDOException $e) {
+            throw new \PDOException("Failed to load table '{$table}': " . $e->getMessage(), (int) $e->getCode(), $e);
         }
     }
 

@@ -4,23 +4,13 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-// Загружаем конфиг как массив
+ob_start(); // буферизация вывода
+
 $config = require __DIR__ . '/Config.php';
 
-// Вручную задаём переменные окружения (без .env)
-
-//$_ENV['DEEPSEEK_DB_HOST'] = 'poetrax_deepseek_mysql';
-$_ENV['DEEPSEEK_DB_HOST'] = 'localhost';
-//$_ENV['DEEPSEEK_DB_HOST'] = '127.127.126.26:3306';
-
+$_ENV['DEEPSEEK_DB_HOST'] = 'poetrax_deepseek_mysql';
 $_ENV['DEEPSEEK_DB_NAME'] = 'u3436142_poetrax_deepseek_db';
 $_ENV['DEEPSEEK_DB_USER'] = 'u3436142_poetrax_deepseek_user';
-
-//$_ENV['DEEPSEEK_DB_NAME'] = 'u3436142_ru';
-//$_ENV['DEEPSEEK_DB_USER'] = 'u3436142_poetrax_deepseek_user';
-
-
-
 $_ENV['DB_PASSWORD'] = 'CI57bdR7m6F9Xem7';
 
 $dbConfig = [
@@ -38,55 +28,6 @@ $connection = Connection::getInstance($dbConfig);
 $cache = Cache::getInstance();
 $loader = new Loader($connection, $cache, $config);
 
-
-// Диагностика Loader
-
-echo "Подключено к БД: " . $dbConfig['database'];
-$stmt = $pdo->query("SHOW DATABASES");
-$databases = $stmt->fetchAll(PDO::FETCH_COLUMN);
-echo "Доступные базы: " . implode(', ', $databases);
-
-$pdo->exec("USE u3436142_ru");  // или другая база, где есть таблицы
-$stmt = $pdo->query("SHOW TABLES");
-$tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
-echo "Таблицы в базе u3436142_ru: " . implode(', ', $tables);
-
-/*
-$tracksData = $loader->getTableData('bm_ctbl000_track');
-if ($tracksData) {
-    echo "✅ Таблица треков загружена, записей: " . count($tracksData);
-} else {
-    echo "❌ Таблица треков НЕ загружена";
-}
-exit;
-*/
-
-try {
-    $pdo = Connection::getPDO();
-    $stmt = $pdo->query("SHOW TABLES");
-    //$stmt = $pdo->query("Select 1");
-    $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    echo "Таблицы в базе: " . implode(', ', $tables);
-} catch (Exception $e) {
-    echo "Ошибка: " . $e->getMessage();
-}
-exit;
-
-
-try {
-    $pdo = Connection::getPDO();
-    $stmt = $pdo->query("SELECT COUNT(*) FROM bm_ctbl000_track");
-    $count = $stmt->fetchColumn();
-    echo "✅ База доступна, в таблице треков: $count записей";
-} catch (Exception $e) {
-    echo "❌ Ошибка БД: " . $e->getMessage();
-}
-exit;
-
-$loader->warmupCache();
-echo "✅ Кэш таблиц прогрет";
-exit;
-
 $warmupTtl = $config['cache']['warmup_ttl'] ?? 86400;
 if (!$cache->has('table:warmed_up')) {
     $loader->warmupCache();
@@ -100,10 +41,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 if ($_SERVER['REQUEST_URI'] === '/api/tracks') {
     header('Content-Type: application/json');
-    echo json_encode(['success' => true, 'message' => 'API works']);
-    exit;
 }
-
 
 // Создаём роутер
 $router = new Router();
