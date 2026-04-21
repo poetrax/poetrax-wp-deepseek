@@ -1,0 +1,5 @@
+# Установить PHPUnit
+composer require --dev phpunit/phpunit
+
+# Запустить тесты
+./vendor/bin/phpunit

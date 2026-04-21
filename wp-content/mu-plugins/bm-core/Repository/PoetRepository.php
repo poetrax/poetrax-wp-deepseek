@@ -2,40 +2,41 @@
 namespace BM\Core\Repository;
 
 use BM\Core\Repository\AbstractRepository;
-
+use BM\Core\Database\TableMapper;
 class PoetRepository extends AbstractRepository
 {
     protected function getTableName(): string
     {
         return 'poet';
     }
-
-    /**
-     * Найти поэта по slug
-     */
-    public function findBySlug(string $slug)
-    {
-        return $this->findOneBy(['poet_slug' => $slug]);
-    }
-
+ 
     /**
      * Получить популярных поэтов (по количеству треков)
      */
-    public function getPopular(int $limit = 10)
+    public function getPopular(int $limit = 10): array
     {
-        $trackTable = $this->connection->table('track');
+        $trackTable = TableMapper::getInstance()->get('track');
         $sql = "
             SELECT p.*, COUNT(t.id) as tracks_count
-            FROM {$this->table} p
+            FROM {$this->getTableName()} p
             LEFT JOIN {$trackTable} t ON p.id = t.poet_id
             WHERE p.is_active = 1 AND p.is_approved = 1
             GROUP BY p.id
-            HAVING tracks_count > 0
+            WHERE t.id IS NOT NULL 
             ORDER BY tracks_count DESC
             LIMIT :limit
         ";
         
         return $this->connection->fetchAll($sql, ['limit' => $limit]);
+    }
+    
+
+    /**
+     * Найти поэта по slug
+     */
+    public function findBySlug(string $slug)
+    {   
+        return $this->findOneBy(['poet_slug' => $slug]);
     }
 
     /**

@@ -156,4 +156,20 @@ class PoetService
         
         return trim($string, '-');
     }
+	
+	/**
+ * Получить поэта по ID
+ */
+public function getById(int $poetId): ?object
+{
+    return $this->poetRepo->find($poetId);
+}
+
+/**
+ * Получить всех поэтов с пагинацией
+ */
+public function getAll(int $page = 1, int $limit = 20): array
+{
+    return $this->poetRepo->getAll($page, $limit);
+}
 }

@@ -107,7 +107,7 @@ class MusicSelectorsSystem {
         ]
     ];
    
-    public function __construct(PDO $pdo) {
+    public function __construct(\PDO $pdo) {
         $this->pdo = $pdo;
     }
 
@@ -117,7 +117,7 @@ class MusicSelectorsSystem {
     public function generate_selector($type) {
         try {
             if (!isset($this->selectors_config[$type])) {
-                throw new InvalidArgumentException("Unknown selector type: {$type}");
+                throw new \InvalidArgumentException("Unknown selector type: {$type}");
             }
 
             $config = $this->selectors_config[$type];
@@ -126,15 +126,15 @@ class MusicSelectorsSystem {
             $stmt = $this->pdo->prepare($query);
             $stmt->execute();
             
-            $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $items = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             
             // Call appropriate builder function
             return call_user_func($config['builder'], $items, $config['type'] ?? $type);
 
-        } catch (PDOException $exception) {
+        } catch (\PDOException $exception) {
             error_log("Database error in {$type}: " . $exception->getMessage());
             return $this->get_error_output($config['builder'] ?? 'create_select');
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             error_log("Error in {$type}: " . $exception->getMessage());
             return $this->get_error_output($config['builder'] ?? 'create_select');
         }

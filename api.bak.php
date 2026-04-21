@@ -11,8 +11,6 @@ ob_start(); // буферизация вывода
 $requestUri = $_SERVER['REQUEST_URI'];
 file_put_contents(__DIR__ . '/debug.log', date('Y-m-d H:i:s') . " - " . $requestUri . PHP_EOL, FILE_APPEND);
 
-$config = require __DIR__ . '/Config.php';
-
 $_ENV['DEEPSEEK_DB_HOST'] = 'poetrax_deepseek_mysql';
 $_ENV['DEEPSEEK_DB_NAME'] = 'u3436142_poetrax_deepseek_db';
 $_ENV['DEEPSEEK_DB_USER'] = 'u3436142_poetrax_deepseek_user';
@@ -28,12 +26,14 @@ $dbConfig = [
 use BM\Core\Database\Connection;
 use BM\Core\Database\Cache;
 use BM\Core\Database\Loader;
+use BM\Core\Config;
 
 $connection = Connection::getInstance($dbConfig);
 $cache = Cache::getInstance();
 $loader = new Loader($connection, $cache, $config);
-
-$warmupTtl = $config['cache']['warmup_ttl'] ?? 86400;
+$config = Config::getInstance();
+$config->get('key');
+$warmupTtl = $config->get('cache.warmup_ttl') ?? 86400;
 if (!$cache->has('table:warmed_up')) {
     $loader->warmupCache();
     $cache->set('table:warmed_up', time(), $warmupTtl);

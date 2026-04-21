@@ -107,8 +107,7 @@ function track_view_api(WP_REST_Request $request) {
     
     // Логируем просмотр
     global $wpdb;
-    $table = $wpdb->'bm_ctbl000_interaction';
-    
+    $table = 'bm_ctbl000_interaction';
     $wpdb->insert($table, [
         'track_id' => $track_id,
         'user_id' => $user_id,

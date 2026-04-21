@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Админка — Poetrax</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo">Poetrax</div>
+        <nav>
+            <a href="/">Главная</a>
+            <a href="/catalog.html">Магазин</a>
+            <a href="/profile.html">Личный кабинет</a>
+            <a href="/messages.html">Сообщения</a>
+            <a href="/admin.html" class="active">Админка</a>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Панель администратора</h1>
+        
+        <div class="admin-tabs">
+            <button class="tab-btn active" data-tab="blocks">Блокировки</button>
+            <button class="tab-btn" data-tab="reports">Жалобы</button>
+            <button class="tab-btn" data-tab="users">Пользователи</button>
+            <button class="tab-btn" data-tab="services">Услуги</button>
+        </div>
+        
+        <div id="blocks-tab" class="tab-content active">
+            <h2>Все блокировки</h2>
+            <div id="all-blocks-list"></div>
+        </div>
+        
+        <div id="reports-tab" class="tab-content">
+            <h2>Жалобы</h2>
+            <div id="reports-list"></div>
+        </div>
+        
+        <div id="users-tab" class="tab-content">
+            <h2>Пользователи</h2>
+            <div id="users-list"></div>
+        </div>
+        
+        <div id="services-tab" class="tab-content">
+            <h2>Управление услугами</h2>
+            <div id="services-list"></div>
+        </div>
+    </main>
+    
+    <script src="/js/api.js"></script>
+    <script src="/js/admin.js"></script>
+</body>
+</html>

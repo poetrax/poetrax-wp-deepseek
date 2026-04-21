@@ -1,36 +1,6 @@
 <?php
-use BM\Database\Pdo;
 
 function process_form_data($data) {
-/*
-track_name
-track_comment
-self_made
-user_made_text
-user_poem_text
-self_made_text
-poet_poem_parent
-track_performance
-styles[]
-instruments[]		
-suno_style_parent
-track_bpm></span>
-track_maj_min
-track_notes
-track_dz_bm
-voice_group
-voice_gender
-genre_select
-voice_character
-temp_select
-presentation_select
-track_mood
-track_theme
-track_site_placement
-track_site_placement
-track_send_email
-agreed[]
-*/
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Валидация и очистка данных
@@ -119,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 function findOrCreateUser($data) {
     global $pdo;
     $query = "SELECT * FROM bm_ctbl000_user WHERE user_email = ?";
-    $user=Pdo::query($query,[$data['your_email']])
+    $user=Pdo::query($query,[$data['your_email']]);
     if ($user) {
         // Полное обновление пользователя
         // Готовим запрос только для тех полей, которые есть в форме и не пусты
@@ -282,6 +252,8 @@ function processStyleGenreSuggestions($track_id, $user_id, $data) {
 add_action('wpcf7_before_send_mail', 'process_custom_form_data');
 add_action('wpcf7_mail_failed', 'process_custom_form_data');
 
+
+
 function process_custom_form_data($contact_form) {
     if ($contact_form->id() != 1169) {
         return;
@@ -298,6 +270,8 @@ function process_custom_form_data($contact_form) {
     }
 }
 
+
+/*
 function process_form_data($data) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -365,14 +339,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             Pdo::commit();
-        /*
-            // Успешный ответ
-            echo json_encode([
-                'success' => true, 
-                'message' => 'Заказ успешно создан',
-                'track_id' => $track_id
-            ]);
-            */
+      
         
         } catch (Exception $e) {
             Pdo::rollBack();
@@ -588,3 +555,4 @@ function processStyleGenreSuggestions($track_id, $user_id, $data) {
     return $suggested;
 }
 
+*/

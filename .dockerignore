@@ -1,0 +1,37 @@
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Логи
+*.log
+error.log
+
+# Тесты
+tests/
+phpunit.xml
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Документация
+docs/
+README.md
+
+# Временные файлы
+*.tmp
+*.cache
+.DS_Store
+
+# Node.js (если есть)
+node_modules/
+package*.json
+
+# Composer dev зависимости
+composer.json
+composer.lock

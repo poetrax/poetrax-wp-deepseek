@@ -6,6 +6,7 @@ use BM\Core\Repository\TrackRepository;
 use BM\Core\Repository\PoetRepository;
 use BM\Core\Repository\PoemRepository;
 use BM\Core\Repository\UserRepository;
+use BM\Core\Config\TableMapper;
 
 class FilterService
 {
@@ -29,7 +30,7 @@ class FilterService
      */
     public function filterTracks(array $filters, int $limit = 20, int $offset = 0): array
     {
-        $sql = "SELECT t.* FROM " . $this->db->table('track') . " t";
+        $sql = "SELECT t.* FROM " . TableMapper::getInstance()->get('track') . " t";
         $where = ["t.is_approved = 1", "t.is_active = 1", "t.status = 'completed'"];
         $params = [];
         
@@ -47,7 +48,7 @@ class FilterService
         
         // Фильтр по жанру (через связанную таблицу)
         if (!empty($filters['genre_id'])) {
-            $sql .= " JOIN " . $this->db->table('track_music_detail') . " md ON t.id = md.track_id";
+            $sql .= " JOIN " . TableMapper::getInstance()->get('track_music_detail') . " md ON t.id = md.track_id";
             $where[] = "md.genre_id = :genre_id";
             $params['genre_id'] = $filters['genre_id'];
         }
@@ -79,7 +80,7 @@ class FilterService
      */
     public function filterPoets(array $filters, int $limit = 20, int $offset = 0): array
     {
-        $sql = "SELECT p.* FROM " . $this->db->table('poet') . " p";
+        $sql = "SELECT p.* FROM " . TableMapper::getInstance()->get('poet') . " p";
         $where = ["p.is_active = 1", "p.is_approved = 1"];
         $params = [];
         
@@ -103,7 +104,7 @@ class FilterService
         
         // Фильтр "есть треки"
         if (!empty($filters['has_tracks'])) {
-            $sql .= " JOIN " . $this->db->table('track') . " t ON p.id = t.poet_id";
+            $sql .= " JOIN " . TableMapper::getInstance()->get('track') . " t ON p.id = t.poet_id";
             $where[] = "t.is_approved = 1";
         }
         
@@ -122,7 +123,7 @@ class FilterService
      */
     public function filterPoems(array $filters, int $limit = 20, int $offset = 0): array
     {
-        $sql = "SELECT pm.* FROM " . $this->db->table('poem') . " pm";
+        $sql = "SELECT pm.* FROM " . TableMapper::getInstance()->get('poem') . " pm";
         $where = ["pm.is_active = 1", "pm.is_approved = 1"];
         $params = [];
         
@@ -146,7 +147,7 @@ class FilterService
         
         // Фильтр "есть треки"
         if (!empty($filters['has_tracks'])) {
-            $sql .= " JOIN " . $this->db->table('track') . " t ON pm.id = t.poem_id";
+            $sql .= " JOIN " . TableMapper::getInstance()->get('track') . " t ON pm.id = t.poem_id";
             $where[] = "t.is_approved = 1";
         }
         
@@ -165,7 +166,7 @@ class FilterService
      */
     public function filterUsers(array $filters, int $limit = 20, int $offset = 0): array
     {
-        $sql = "SELECT u.* FROM " . $this->db->table('user') . " u";
+        $sql = "SELECT u.* FROM " . TableMapper::getInstance()->get('user') . " u";
         $where = ["1=1"];
         $params = [];
         
@@ -183,7 +184,7 @@ class FilterService
         
         // Фильтр по количеству треков
         if (!empty($filters['min_tracks'])) {
-            $sql .= " LEFT JOIN " . $this->db->table('track') . " t ON u.id = t.user_id";
+            $sql .= " LEFT JOIN " . TableMapper::getInstance()->get('track') . " t ON u.id = t.user_id";
             $sql .= " GROUP BY u.id HAVING COUNT(t.id) >= :min_tracks";
             $params['min_tracks'] = $filters['min_tracks'];
         }
@@ -261,9 +262,9 @@ class FilterService
      */
     public function filterPoetsByTrackProperties(array $filters, int $limit = 20, int $offset = 0): array
     {
-        $sql = "SELECT DISTINCT p.* FROM " . $this->db->table('poet') . " p";
-        $sql .= " JOIN " . $this->db->table('track') . " t ON p.id = t.poet_id";
-        $sql .= " LEFT JOIN " . $this->db->table('track_music_detail') . " md ON t.id = md.track_id";
+        $sql = "SELECT DISTINCT p.* FROM " . TableMapper::getInstance()->get('poet') . " p";
+        $sql .= " JOIN " . TableMapper::getInstance()->get('track') . " t ON p.id = t.poet_id";
+        $sql .= " LEFT JOIN " . TableMapper::getInstance()->get('track_music_detail') . " md ON t.id = md.track_id";
         
         $where = ["t.is_approved = 1", "t.is_active = 1", "t.status = 'completed'"];
         $params = [];
@@ -325,9 +326,9 @@ class FilterService
      */
     public function filterPoemsByTrackProperties(array $filters, int $limit = 20, int $offset = 0): array
     {
-        $sql = "SELECT DISTINCT pm.* FROM " . $this->db->table('poem') . " pm";
-        $sql .= " JOIN " . $this->db->table('track') . " t ON pm.id = t.poem_id";
-        $sql .= " LEFT JOIN " . $this->db->table('track_music_detail') . " md ON t.id = md.track_id";
+        $sql = "SELECT DISTINCT pm.* FROM " . TableMapper::getInstance()->get('poem') . " pm";
+        $sql .= " JOIN " . TableMapper::getInstance()->get('track') . " t ON pm.id = t.poem_id";
+        $sql .= " LEFT JOIN " . TableMapper::getInstance()->get('track_music_detail') . " md ON t.id = md.track_id";
         
         $where = ["t.is_approved = 1", "t.is_active = 1", "t.status = 'completed'", "pm.is_active = 1"];
         $params = [];
@@ -386,9 +387,9 @@ class FilterService
      */
     public function filterUsersByTrackProperties(array $filters, int $limit = 20, int $offset = 0): array
     {
-        $sql = "SELECT DISTINCT u.* FROM " . $this->db->table('user') . " u";
-        $sql .= " JOIN " . $this->db->table('track') . " t ON u.id = t.user_id";
-        $sql .= " LEFT JOIN " . $this->db->table('track_music_detail') . " md ON t.id = md.track_id";
+        $sql = "SELECT DISTINCT u.* FROM " . TableMapper::getInstance()->get('user') . " u";
+        $sql .= " JOIN " . TableMapper::getInstance()->get('track') . " t ON u.id = t.user_id";
+        $sql .= " LEFT JOIN " . TableMapper::getInstance()->get('track_music_detail') . " md ON t.id = md.track_id";
         
         $where = ["t.is_approved = 1"];
         $params = [];

@@ -5,6 +5,7 @@ use BM\Core\Repository\TrackRepository;
 use BM\Core\Repository\PoetRepository;
 use BM\Core\Repository\PoemRepository;
 use BM\Core\Repository\InteractionRepository;
+use BM\Core\Service\BlockService;
 
 class TrackService
 {

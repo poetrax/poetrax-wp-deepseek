@@ -1,8 +1,6 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
 
-$config = require __DIR__ . '/Config.php';
-
 $_ENV['DEEPSEEK_DB_HOST'] = 'poetrax_deepseek_mysql';
 $_ENV['DEEPSEEK_DB_NAME'] = 'u3436142_poetrax_deepseek_db';
 $_ENV['DEEPSEEK_DB_USER'] = 'u3436142_poetrax_deepseek_user';

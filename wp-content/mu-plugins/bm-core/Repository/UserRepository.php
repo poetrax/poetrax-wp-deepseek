@@ -2,6 +2,7 @@
 namespace BM\Core\Repository;
 
 use BM\Core\Repository\AbstractRepository;
+use BM\Core\Config\TableMapper;
 
 class UserRepository extends AbstractRepository
 {
@@ -32,7 +33,7 @@ class UserRepository extends AbstractRepository
     public function findByLoginOrEmail(string $username)
     {
         $sql = "
-            SELECT * FROM {$this->table}
+            SELECT * FROM {$this->getTableName()}
             WHERE user_login = :login OR user_email = :email
             LIMIT 1
         ";
@@ -49,7 +50,7 @@ class UserRepository extends AbstractRepository
     public function exists(string $login, string $email): bool
     {
         $sql = "
-            SELECT COUNT(*) as total FROM {$this->table}
+            SELECT COUNT(*) as total FROM {$this->getTableName()}
             WHERE user_login = :login OR user_email = :email
         ";
         
@@ -66,10 +67,11 @@ class UserRepository extends AbstractRepository
      */
     public function getActive(int $days = 30, int $limit = 50)
     {
-        $interactionTable = $this->connection->table('interaction');
+        $interactionTable = TableMapper::getInstance()->get('interaction');
+       
         $sql = "
             SELECT DISTINCT u.*
-            FROM {$this->table} u
+            FROM {$this->getTableName()} u
             JOIN {$interactionTable} i ON u.id = i.user_id
             WHERE i.created_at > NOW() - INTERVAL :days DAY
             ORDER BY u.user_login

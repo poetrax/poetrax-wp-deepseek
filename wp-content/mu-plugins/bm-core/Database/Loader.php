@@ -3,6 +3,7 @@ namespace BM\Core\Database;
 
 use PDO;
 use PDOException;
+use BM\Core\Config;
 
 class Loader
 {
@@ -21,7 +22,8 @@ class Loader
 		$this->dictionaryRowLimit = $this->config['database']['dictionary_row_limit'] ?? 1000;
 		$this->cacheRowLimit = $this->config['database']['cache_row_limit'] ?? 5000;
 		$this->cacheTtl = $this->config['cache']['ttl'] ?? 3600;
-    }
+		$this->dictionaryRowLimit = $this->config->get('database.dictionary_row_limit', 1000);
+	 }
 
     public function loadAllTables(): void
     {

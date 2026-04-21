@@ -317,7 +317,7 @@ class QueryBuilder
 // Пример с пагинацией
 $queryBuilder = new QueryBuilder($connection);
 $result = $queryBuilder
-    ->table('bm_ctbl000_track')
+    ->TableMapper::getInstance()->get('track')
     ->where('is_approved', 1)
     ->where('is_active', 1)
     ->orderBy('created_at', 'DESC')

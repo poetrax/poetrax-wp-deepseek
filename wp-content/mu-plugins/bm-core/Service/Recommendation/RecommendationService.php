@@ -5,6 +5,7 @@ use BM\Core\Database\Connection;
 use BM\Core\Repository\TrackRepository;
 use BM\Core\Repository\InteractionRepository;
 use BM\Core\Repository\UserRepository;
+use BM\Core\Config\TableMapper;
 
 class RecommendationService
 {
@@ -61,8 +62,8 @@ class RecommendationService
             return [];
         }
         
-        $sql = "SELECT t.* FROM " . $this->db->table('track') . " t";
-        $sql .= " LEFT JOIN " . $this->db->table('track_music_detail') . " md ON t.id = md.track_id";
+        $sql = "SELECT t.* FROM " . TableMapper::getInstance()->get('track') . " t";
+        $sql .= " LEFT JOIN " . TableMapper::getInstance()->get('track_music_detail') . " md ON t.id = md.track_id";
         $sql .= " WHERE t.is_approved = 1 AND t.is_active = 1 AND t.status = 'completed' AND t.id != :track_id";
         
         $params = ['track_id' => $trackId];
@@ -122,7 +123,7 @@ class RecommendationService
      */
     public function forPoet(int $poetId, int $limit = 10): array
     {
-        $sql = "SELECT t.* FROM " . $this->db->table('track') . " t";
+        $sql = "SELECT t.* FROM " . TableMapper::getInstance()->get('track') . " t";
         $sql .= " WHERE t.poet_id = :poet_id";
         $sql .= " AND t.is_approved = 1 AND t.is_active = 1";
         $sql .= " ORDER BY t.created_at DESC LIMIT :limit";
@@ -138,7 +139,7 @@ class RecommendationService
      */
     public function forPoem(int $poemId, int $limit = 10): array
     {
-        $sql = "SELECT t.* FROM " . $this->db->table('track') . " t";
+        $sql = "SELECT t.* FROM " . TableMapper::getInstance()->get('track') . " t";
         $sql .= " WHERE t.poem_id = :poem_id";
         $sql .= " AND t.is_approved = 1 AND t.is_active = 1";
         $sql .= " ORDER BY t.created_at DESC LIMIT :limit";
@@ -155,8 +156,8 @@ class RecommendationService
     public function getTrending(int $limit = 20): array
     {
         $sql = "SELECT t.*, COUNT(i.id) as plays_last_week";
-        $sql .= " FROM " . $this->db->table('track') . " t";
-        $sql .= " JOIN " . $this->db->table('interaction') . " i ON t.id = i.track_id AND i.type = 'play'";
+        $sql .= " FROM " . TableMapper::getInstance()->get('track') . " t";
+        $sql .= " JOIN " . TableMapper::getInstance()->get('interaction') . " i ON t.id = i.track_id AND i.type = 'play'";
         $sql .= " WHERE i.created_at > NOW() - INTERVAL 7 DAY";
         $sql .= " AND t.is_approved = 1 AND t.is_active = 1";
         $sql .= " GROUP BY t.id ORDER BY plays_last_week DESC LIMIT :limit";
@@ -177,9 +178,9 @@ class RecommendationService
         }
         
         $sql = "SELECT t.*, COUNT(i.id) as plays_last_week";
-        $sql .= " FROM " . $this->db->table('track') . " t";
-        $sql .= " JOIN " . $this->db->table('interaction') . " i ON t.id = i.track_id AND i.type = 'play'";
-        $sql .= " JOIN " . $this->db->table('track_music_detail') . " md ON t.id = md.track_id";
+        $sql .= " FROM " . TableMapper::getInstance()->get('track') . " t";
+        $sql .= " JOIN " . TableMapper::getInstance()->get('interaction') . " i ON t.id = i.track_id AND i.type = 'play'";
+        $sql .= " JOIN " . TableMapper::getInstance()->get('track_music_detail') . " md ON t.id = md.track_id";
         $sql .= " WHERE i.created_at > NOW() - INTERVAL 7 DAY";
         $sql .= " AND md.genre_id IN (" . implode(',', $likedGenres) . ")";
         $sql .= " AND t.is_approved = 1 AND t.is_active = 1";
@@ -194,9 +195,9 @@ class RecommendationService
     private function getUserPreferredGenres(int $userId): array
     {
         $sql = "SELECT DISTINCT md.genre_id";
-        $sql .= " FROM " . $this->db->table('interaction') . " i";
-        $sql .= " JOIN " . $this->db->table('track') . " t ON i.track_id = t.id";
-        $sql .= " JOIN " . $this->db->table('track_music_detail') . " md ON t.id = md.track_id";
+        $sql .= " FROM " . TableMapper::getInstance()->get('interaction') . " i";
+        $sql .= " JOIN " . TableMapper::getInstance()->get('track') . " t ON i.track_id = t.id";
+        $sql .= " JOIN " . TableMapper::getInstance()->get('track_music_detail') . " md ON t.id = md.track_id";
         $sql .= " WHERE i.user_id = :user_id";
         $sql .= " AND i.type IN ('like', 'play')";
         $sql .= " AND md.genre_id IS NOT NULL";
@@ -219,8 +220,8 @@ class RecommendationService
         
         // Находим пользователей с похожими вкусами
         $sql = "SELECT i2.user_id, COUNT(*) as common_tracks";
-        $sql .= " FROM " . $this->db->table('interaction') . " i1";
-        $sql .= " JOIN " . $this->db->table('interaction') . " i2 ON i1.track_id = i2.track_id";
+        $sql .= " FROM " . TableMapper::getInstance()->get('interaction') . " i1";
+        $sql .= " JOIN " . TableMapper::getInstance()->get('interaction') . " i2 ON i1.track_id = i2.track_id";
         $sql .= " WHERE i1.track_id IN ($placeholders)";
         $sql .= " AND i1.user_id != i2.user_id";
         $sql .= " GROUP BY i2.user_id ORDER BY common_tracks DESC LIMIT 50";
@@ -237,8 +238,8 @@ class RecommendationService
         
         // Берём треки, которые нравятся похожим пользователям
         $sql = "SELECT DISTINCT t.*, COUNT(*) as relevance";
-        $sql .= " FROM " . $this->db->table('track') . " t";
-        $sql .= " JOIN " . $this->db->table('interaction') . " i ON t.id = i.track_id";
+        $sql .= " FROM " . TableMapper::getInstance()->get('track') . " t";
+        $sql .= " JOIN " . TableMapper::getInstance()->get('interaction') . " i ON t.id = i.track_id";
         $sql .= " WHERE i.user_id IN ($userPlaceholders)";
         $sql .= " AND i.type IN ('like', 'play')";
         $sql .= " AND t.id NOT IN ($placeholders)";

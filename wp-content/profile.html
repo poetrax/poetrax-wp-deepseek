@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Личный кабинет — Poetrax</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo">Poetrax</div>
+        <nav>
+            <a href="/">Главная</a>
+            <a href="/catalog.html">Магазин</a>
+            <a href="/profile.html" class="active">Личный кабинет</a>
+            <a href="/messages.html">Сообщения</a>
+            <a href="/admin.html">Админка</a>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Личный кабинет</h1>
+        
+        <div class="profile-tabs">
+            <button class="tab-btn active" data-tab="profile">Профиль</button>
+            <button class="tab-btn" data-tab="services">Мои услуги</button>
+            <button class="tab-btn" data-tab="orders">Заказы</button>
+            <button class="tab-btn" data-tab="blocks">Блокировки</button>
+        </div>
+        
+        <div id="profile-tab" class="tab-content active">
+            <h2>Профиль</h2>
+            <div id="profile-info"></div>
+        </div>
+        
+        <div id="services-tab" class="tab-content">
+            <h2>Мои услуги</h2>
+            <div id="services-list"></div>
+        </div>
+        
+        <div id="orders-tab" class="tab-content">
+            <h2>Мои заказы</h2>
+            <div id="orders-list"></div>
+        </div>
+        
+        <div id="blocks-tab" class="tab-content">
+            <h2>Кого я заблокировал</h2>
+            <div id="my-blocks-list"></div>
+            <h2>Кто меня заблокировал</h2>
+            <div id="blocks-on-me-list"></div>
+        </div>
+    </main>
+    
+    <div id="payment-modal" class="modal">
+        <div class="modal-content">
+            <p id="payment-message"></p>
+            <button id="payment-buy">Купить доступ</button>
+            <button onclick="document.getElementById('payment-modal').style.display='none'">Закрыть</button>
+        </div>
+    </div>
+    
+    <script src="/js/api.js"></script>
+    <script src="/js/profile.js"></script>
+</body>
+</html>

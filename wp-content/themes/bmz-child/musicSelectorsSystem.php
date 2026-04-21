@@ -9,6 +9,7 @@
     'builder' => 'create_select' // или 'build_ta'
 ]
 */
+use BM\Core\Config;
 
 class MusicSelectorsSystem {
     private $pdo;

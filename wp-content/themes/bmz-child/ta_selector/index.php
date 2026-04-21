@@ -1,0 +1,142 @@
+﻿<?php
+/*ta_selector*/
+/*<!-- use -->
+<?php echo do_shortcode('[ta_selector]');?>*/
+
+add_action('wp_ajax_get_properties', 'handle_get_properties');
+add_action('wp_ajax_nopriv_get_properties', 'handle_get_properties');
+add_action('wp_ajax_save_selection', 'save_selection_callback');
+add_action('wp_ajax_nopriv_save_selection', 'save_selection_callback');
+
+function handle_get_properties() {
+    try {
+        global $pdo;
+        $query = "SELECT * FROM _test_properties ORDER BY category, name";
+        $properties = [];
+        $properties = Pdo::query($query);
+
+        // Используем только один метод вывода
+        wp_send_json_success($properties);
+    
+    } catch(PDOException $exception) {
+        wp_send_json_error('Ошибка получения данных: ' . $exception->getMessage());
+    }
+    
+    wp_die();
+
+}
+
+/*пример*/
+function save_selection_callback() {
+    try {
+        // Проверяем nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'text_file_ajax_nonce')) {
+            wp_send_json_error(['message' => 'Security check failed']);
+            return;
+        }
+         // Проверяем права пользователя
+    if (!current_user_can('edit_posts')) {
+        wp_send_json_error(['message' => 'Insufficient permissions']);
+        return;
+    }
+        // Получаем и декодируем данные
+        $selected_properties_json = $_POST['selectedProperties'] ?? '[]';
+        $selected_properties = json_decode($selected_properties_json, true);
+
+        // Валидируем данные
+        if (!is_array($selected_properties)) {
+            wp_send_json_error(['message' => 'Invalid data format']);
+            return;
+        }
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            wp_send_json_error(['message' => 'Invalid JSON: ' . json_last_error_msg()]);
+            return;
+        }
+
+        // Сохраняем данные (пример)
+        update_user_meta(get_current_user_id(), 'selected_properties', $selected_properties);
+       
+        /*
+         // Проверяем, не существует ли уже запись
+    $query = "SELECT id FROM _test_user_properties WHERE user_id = ?";
+    $existing = Pdo::row($query, [$userId]);
+
+    $sql= $existing ? "UDATE _test_user_properties SET properties=? WHERE user_id=?"
+    : "INSERT INTO _test_user_properties (user_id, properties) VALUES (?, ?)";
+    require_once 'db.php';
+    $db = new Db;
+    //wrong use global $pdo
+    if($existing){
+        $db->query($sql, [$selectedProperties,$userId]);
+    } else {
+        $db->query($sql, [$userId,$selectedProperties]);
+    }
+        */
+
+        // Успешный ответ
+        wp_send_json_success([
+            'selectedCount' => count($selected_properties),
+            'message' => 'Selection saved successfully'
+        ]);
+
+    } catch (Exception $e) {
+        wp_send_json_error(['message' => $e->getMessage()]);
+    }
+
+      wp_die();
+}
+
+
+function ta_selector_script()
+{
+    if (!wp_script_is('ta-selector', 'registered')) {
+        wp_enqueue_script('ta-selector', CHILD_JS_DIR . 'ta-selector.js', array(), '0.0.0', true);
+        wp_localize_script('properties-selector', 'textFileAjax', [
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('text_file_ajax_nonce')
+        ]);
+    }
+}
+add_action('wp_enqueue_scripts', 'ta_selector_script');
+
+function ta_selector_code() {
+$selector='';
+    $selector.='<div class="container">';
+        $selector.='<h1>Выбор свойств</h1>';
+        $selector.='<div class="controls">';
+            $selector.='<input type="text" id="searchInput" placeholder="Поиск свойств..." class="search-input">';
+            $selector.='<button id="selectAll" class="btn">Выбрать все</button>';
+            $selector.='<button id="clearAll" class="btn btn-clear">Очистить все</button>';
+        $selector.='</div>';
+        $selector.='<div class="properties-container">';
+            $selector.='<div class="categories-sidebar">';
+                $selector.='<h3>Категории</h3>';
+                $selector.='<div id="categoriesList" class="categories-list"></div>';
+            $selector.='</div>';
+            $selector.='<div class="properties-area">';
+                $selector.='<div class="properties-header">';
+                    $selector.='<h3>Доступные свойства</h3>';
+                    $selector.='<span id="selectedCount" class="selected-count">Выбрано: 0</span>';
+                $selector.='</div>';
+                $selector.='<div id="propertiesTextarea" class="properties-textarea" contenteditable="false">';
+                    $selector.='<div id="propertiesGrid" class="properties-grid"></div>';
+                $selector.='</div>';
+                $selector.='<div class="selected-properties">';
+                    $selector.='<h3>Выбранные свойства</h3>';
+                    $selector.='<div id="selectedList" class="selected-list"></div>';
+                $selector.='</div>';
+                $selector.='<div class="actions">';
+                    $selector.='<button id="saveSelection" class="btn btn-primary">Сохранить выбор</button>';
+                    $selector.='<button id="resetSelection" class="btn btn-secondary">Сбросить</button>';
+                $selector.='</div>';
+            $selector.='</div>';
+        $selector.='</div>';
+        $selector.='<div id="message" class="message"></div>';
+    $selector.='</div>';
+    
+return $selector;
+}
+add_shortcode('ta_selector', 'ta_selector_code');
+
+/*ta_selector*/

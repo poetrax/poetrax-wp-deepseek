@@ -18,22 +18,44 @@ class TrackController extends BaseController
     /**
      * GET /api/tracks - список треков
      */
-    public function index(): string
-    {
-        $page = (int) ($this->getParam('page', 1));
-        $limit = (int) ($this->getParam('limit', 20));
-        
-        $tracks = $this->trackService->getTrackRepo()->getPaginated($page, $limit);
-        $total = $this->trackService->getTrackRepo()->count();
-
-        return $this->jsonSuccess([
-            'items' => $tracks,
-            'page' => $page,
-            'limit' => $limit,
-            'total' => $total,
-            'pages' => ceil($total / $limit)
-        ]);
-    }
+   public function index(): void
+{
+    $page = (int) ($_GET['page'] ?? 1);
+    $limit = (int) ($_GET['limit'] ?? 20);
+    
+    // Ограничиваем максимальный лимит
+    $maxLimit = $this->config['pagination']['max_limit'] ?? 100;
+    $limit = min($limit, $maxLimit);
+    
+    // Фильтры
+    $filters = [
+        'voice_gender' => $_GET['voice_gender'] ?? null,
+        'lang' => $_GET['lang'] ?? null,
+        'mood_id' => $_GET['mood_id'] ?? null,
+        'theme_id' => $_GET['theme_id'] ?? null,
+        'genre_id' => $_GET['genre_id'] ?? null,
+        'style_id' => $_GET['style_id'] ?? null,
+    ];
+    $filters = array_filter($filters);
+    
+    // Получаем данные
+    $result = $this->trackService->getTrackRepo()->getFiltered($filters, $page, $limit);
+    
+    // Формируем ответ (как в старом методе)
+    $response = [
+        'success' => true,
+        'data' => [
+            'items' => $result['data'],
+            'page' => $result['pagination']['page'],
+            'limit' => $result['pagination']['per_page'],
+            'total' => $result['pagination']['total'],
+            'pages' => $result['pagination']['last_page'],
+        ]
+    ];
+    
+    header('Content-Type: application/json');
+    echo json_encode($response);
+}
 
     /**
      * GET /api/tracks/{id} - один трек
@@ -154,4 +176,6 @@ class TrackController extends BaseController
         
         return $this->jsonSuccess($tracks);
     }
+	
+
 }

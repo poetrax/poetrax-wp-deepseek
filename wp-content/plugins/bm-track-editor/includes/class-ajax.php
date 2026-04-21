@@ -1,6 +1,6 @@
 <?php
 use BM\Database\Connection;
-
+use BM\Core\Config\TableMapper;
 /**
  * AJAX обработчики
  */
@@ -80,14 +80,14 @@ class BM_TE_Ajax {
         }
         
         $track = Connection::row(
-            "SELECT * FROM " . Connection::table('track') . " WHERE id = %d",
+            "SELECT * FROM " . TableMapper::getInstance()->get('track') . " WHERE id = %d",
             [$track_id]
         );
         
         if ($track) {
             // Получаем музыкальные детали
             $details = Connection::row(
-                "SELECT * FROM " . Connection::table('music_detail') . " WHERE track_id = %d",
+                "SELECT * FROM " . TableMapper::getInstance()->get('music_detail') . " WHERE track_id = %d",
                 [$track_id]
             );
             
@@ -172,8 +172,8 @@ class BM_TE_Ajax {
         }
         
         $sql = "SELECT p.*, pt.short_name as poet_name 
-                FROM " . Connection::table('poem') . " p
-                LEFT JOIN " . Connection::table('poet') . " pt ON p.poet_id = pt.id
+                FROM " . TableMapper::getInstance()->get('poem') . " p
+                LEFT JOIN " . TableMapper::getInstance()->get('poet') . " pt ON p.poet_id = pt.id
                 WHERE p.name LIKE %s";
         
         $params = ['%' . $wpdb->esc_like($query) . '%'];
@@ -198,7 +198,7 @@ class BM_TE_Ajax {
         
         $poets = Connection::query(
             "SELECT id, short_name, last_name, first_name 
-             FROM " . Connection::table('poet') . " 
+             FROM " . TableMapper::getInstance()->get('poet') . " 
              WHERE is_active = 1 
              ORDER BY last_name"
         );
@@ -215,14 +215,14 @@ class BM_TE_Ajax {
         global $wpdb;
         
         $stats = [
-            'total_tracks' => Connection::var("SELECT COUNT(*) FROM " . Connection::table('track')),
-            'total_poems' => Connection::var("SELECT COUNT(*) FROM " . Connection::table('poem')),
-            'total_poets' => Connection::var("SELECT COUNT(*) FROM " . Connection::table('poet')),
-            'total_plays' => Connection::var("SELECT COUNT(*) FROM " . Connection::table('interaction') . " WHERE type = 'play'"),
+            'total_tracks' => Connection::var("SELECT COUNT(*) FROM " . TableMapper::getInstance()->get('track')),
+            'total_poems' => Connection::var("SELECT COUNT(*) FROM " . TableMapper::getInstance()->get('poem')),
+            'total_poets' => Connection::var("SELECT COUNT(*) FROM " . TableMapper::getInstance()->get('poet')),
+            'total_plays' => Connection::var("SELECT COUNT(*) FROM " . TableMapper::getInstance()->get('interaction') . " WHERE type = 'play'"),
             'recent_tracks' => Connection::query(
                 "SELECT t.*, p.short_name as poet_name 
-                 FROM " . Connection::table('track') . " t
-                 LEFT JOIN " . Connection::table('poet') . " p ON t.poet_id = p.id
+                 FROM " . TableMapper::getInstance()->get('track') . " t
+                 LEFT JOIN " . TableMapper::getInstance()->get('poet') . " p ON t.poet_id = p.id
                  ORDER BY t.created_at DESC
                  LIMIT 5"
             )
