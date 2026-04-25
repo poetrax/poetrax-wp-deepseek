@@ -1,150 +1,214 @@
 <?php
-namespace BM\Core\Repository;
+namespace BM\Repositories;
 
-use BM\Core\Database\TableMapper;
+use BM\Core\Database\Connection;  // Исправлен неймспейс
+use BM\Core\Database\Cache;
+use BM\Database\QueryBuilder;
+use BM\Taxonomies\EntityRelations;
+use PDO;
 
-class PoemRepository extends AbstractRepository
+class PoemRepository implements RepositoryInterface
 {
-    private const FIELD_IS_ACTIVE = 'is_active';
-    private const FIELD_IS_APPROVED = 'is_approved';
-    private const FIELD_CREATED_AT = 'created_at';
-    private const DEFAULT_LIMIT = 10;
-    private const MAX_LIMIT = 100;
+    private Connection $connection;
+    private string $table = 'poems';
 
-    protected function getTableName(): string
+    public function __construct(?Connection $connection = null)
     {
-        return TableMapper::getInstance()->get('poem');
+        $this->connection = $connection ?? Connection::getInstance();
     }
 
     /**
-     * Найти стихотворение по ID
+     * Найти стих по ID
      */
-    public function find(int $id): ?array
+    public function find($id): ?array
     {
-        $sql = "SELECT * FROM {$this->getTableName()} WHERE id = ?";
-        return $this->connection->fetchOne($sql, [$id]);
+        $sql = "SELECT * FROM {$this->getTable()} WHERE id = :id AND is_active = 1";
+        return $this->connection->fetchOne($sql, ['id' => $id]);
     }
 
     /**
-     * Найти стихотворение по slug
+     * Найти стих по slug
      */
     public function findBySlug(string $slug): ?array
     {
-        $sql = "SELECT * FROM {$this->getTableName()} WHERE poem_slug = ?";
-        return $this->connection->fetchOne($sql, [$slug]);
+        $sql = "SELECT * FROM {$this->getTable()} WHERE slug = :slug AND is_active = 1";
+        return $this->connection->fetchOne($sql, ['slug' => $slug]);
     }
 
     /**
-     * Найти стихотворения по поэту
+     * Популярные стихи (по количеству треков)
      */
-    public function findByPoet(int $poetId, int $limit = self::DEFAULT_LIMIT): array
+    public function getPopular(int $limit = 10): array
     {
-        $limit = min($limit, self::MAX_LIMIT);
-        $sql = "SELECT * FROM {$this->getTableName()} 
-                WHERE poet_id = ? 
-                AND " . self::FIELD_IS_ACTIVE . " = 1 
-                AND " . self::FIELD_IS_APPROVED . " = 1
-                ORDER BY name
-                LIMIT ?";
-        return $this->connection->fetchAll($sql, [$poetId, $limit]);
-    }
+        $cacheKey = "poems:popular:{$limit}";
 
-    /**
-     * Получить все стихотворения (с пагинацией)
-     */
-    public function getAll(int $page = 1, int $limit = self::DEFAULT_LIMIT): array
-    {
-        $limit = min($limit, self::MAX_LIMIT);
-        $offset = ($page - 1) * $limit;
-        
-        $sql = "SELECT * FROM {$this->getTableName()} 
-                WHERE " . self::FIELD_IS_ACTIVE . " = 1 
-                AND " . self::FIELD_IS_APPROVED . " = 1
-                ORDER BY name
-                LIMIT ? OFFSET ?";
-        
-        $items = $this->connection->fetchAll($sql, [$limit, $offset]);
-        
-        // Общее количество
-        $countSql = "SELECT COUNT(*) FROM {$this->getTableName()} 
-                     WHERE " . self::FIELD_IS_ACTIVE . " = 1 
-                     AND " . self::FIELD_IS_APPROVED . " = 1";
-        $total = (int) $this->connection->fetchOne($countSql)['COUNT(*)'];
-        
-        return [
-            'items' => $items,
-            'total' => $total,
-            'page' => $page,
-            'limit' => $limit,
-            'pages' => ceil($total / $limit)
-        ];
-    }
-
-    /**
-     * Поиск стихотворений по названию
-     */
-    public function searchByName(string $query, int $limit = self::DEFAULT_LIMIT): array
-    {
-        if (strlen($query) < 2) {
-            return [];
+        // Пытаемся получить из кэша
+        $cached = Cache::get($cacheKey);
+        if ($cached !== null) {
+            return $cached;
         }
-        
-        $limit = min($limit, self::MAX_LIMIT);
-        $sql = "SELECT * FROM {$this->getTableName()} 
-                WHERE name LIKE ? 
-                AND " . self::FIELD_IS_ACTIVE . " = 1 
-                AND " . self::FIELD_IS_APPROVED . " = 1
-                LIMIT ?";
-        
-        return $this->connection->fetchAll($sql, ["%$query%", $limit]);
+
+        $sql = "
+            SELECT p.*, COUNT(t.id) as tracks_count
+            FROM {$this->getTable()} p
+            LEFT JOIN tracks t 
+                ON p.id = t.poem_id 
+                AND t.is_approved = 1 
+                AND t.is_active = 1
+                AND t.status = 'completed'
+            WHERE p.is_active = 1 AND p.is_approved = 1
+            GROUP BY p.id
+            HAVING tracks_count > 0
+            ORDER BY tracks_count DESC
+            LIMIT :limit
+        ";
+
+        $poems = $this->connection->fetchAll($sql, ['limit' => $limit]);
+
+        // Сохраняем в кэш
+        Cache::set($cacheKey, $poems, 3600);
+
+        return $poems;
     }
 
     /**
-     * Получить текст стихотворения
+     * Получить стихи по поэту
      */
-    public function getPoemText(int $poemId): ?string
+    public function getByPoet(int $poetId, int $limit = 20, int $offset = 0): array
     {
-        $sql = "SELECT poem_text FROM {$this->getTableName()} WHERE id = ?";
-        $result = $this->connection->fetchOne($sql, [$poemId]);
-        return $result['poem_text'] ?? null;
+        $sql = "
+            SELECT p.* 
+            FROM {$this->getTable()} p
+            WHERE p.poet_id = :poet_id 
+                AND p.is_active = 1 
+                AND p.is_approved = 1
+            ORDER BY p.publish_date DESC
+            LIMIT :limit OFFSET :offset
+        ";
+
+        return $this->connection->fetchAll($sql, [
+            'poet_id' => $poetId,
+            'limit' => $limit,
+            'offset' => $offset
+        ]);
     }
 
     /**
-     * Создать новое стихотворение
+     * Поиск стихов
      */
-    public function create(array $data): int
+    public function search(string $query, int $limit = 20): array
     {
-        return $this->connection->insert($this->getTableName(), $data);
+        $sql = "
+            SELECT p.* 
+            FROM {$this->getTable()} p
+            WHERE (p.title LIKE :query 
+                OR p.content LIKE :query 
+                OR p.excerpt LIKE :query)
+                AND p.is_active = 1 
+                AND p.is_approved = 1
+            ORDER BY p.publish_date DESC
+            LIMIT :limit
+        ";
+
+        return $this->connection->fetchAll($sql, [
+            'query' => '%' . $query . '%',
+            'limit' => $limit
+        ]);
     }
 
     /**
-     * Обновить стихотворение
-     */
-    public function update(int $id, array $data): int
-    {
-        return $this->connection->update($this->getTableName(), $data, "id = $id");
-    }
-
-    /**
-     * Удалить стихотворение (мягкое удаление)
-     */
-    public function delete(int $id): int
-    {
-        return $this->connection->update($this->getTableName(), 
-            [self::FIELD_IS_ACTIVE => 0], 
-            "id = $id"
-        );
-    }
-
-    /**
-     * Получить количество стихотворений у поэта
+     * Получить количество стихов поэта
      */
     public function countByPoet(int $poetId): int
     {
-        $sql = "SELECT COUNT(*) FROM {$this->getTableName()} 
-                WHERE poet_id = ? 
-                AND " . self::FIELD_IS_ACTIVE . " = 1";
-        $result = $this->connection->fetchOne($sql, [$poetId]);
-        return (int) ($result['COUNT(*)'] ?? 0);
+        $sql = "
+            SELECT COUNT(*) as count
+            FROM {$this->getTable()}
+            WHERE poet_id = :poet_id 
+                AND is_active = 1 
+                AND is_approved = 1
+        ";
+
+        $result = $this->connection->fetchOne($sql, ['poet_id' => $poetId]);
+        return (int) ($result['count'] ?? 0);
+    }
+
+    /**
+     * Получить последние стихи
+     */
+    public function getLatest(int $limit = 10): array
+    {
+        $sql = "
+            SELECT p.*, poet.name as poet_name
+            FROM {$this->getTable()} p
+            LEFT JOIN poets poet ON p.poet_id = poet.id
+            WHERE p.is_active = 1 AND p.is_approved = 1
+            ORDER BY p.created_at DESC
+            LIMIT :limit
+        ";
+
+        return $this->connection->fetchAll($sql, ['limit' => $limit]);
+    }
+
+    /**
+     * Получить имя таблицы
+     */
+    protected function getTable(): string
+    {
+        // Можно использовать конфиг или префикс
+        $prefix = defined('BM_TABLE_PREFIX') ? BM_TABLE_PREFIX : 'bm_';
+        return $prefix . 'poems';
+    }
+
+    // Реализация методов интерфейса RepositoryInterface
+    public function create(array $data): int
+    {
+        $data['created_at'] = date('Y-m-d H:i:s');
+        $data['updated_at'] = date('Y-m-d H:i:s');
+
+        return $this->connection->insert($this->getTable(), $data);
+    }
+
+    public function update(int $id, array $data): int
+    {
+        $data['updated_at'] = date('Y-m-d H:i:s');
+
+        return $this->connection->update($this->getTable(), $data, "id = :id", ['id' => $id]);
+    }
+
+    public function delete(int $id): int
+    {
+        // Soft delete
+        return $this->connection->update(
+            $this->getTable(),
+            ['is_active' => 0, 'updated_at' => date('Y-m-d H:i:s')],
+            "id = :id",
+            ['id' => $id]
+        );
+    }
+
+    public function findAll(array $criteria = [], array $orderBy = [], int $limit = 100, int $offset = 0): array
+    {
+        $sql = "SELECT * FROM {$this->getTable()} WHERE is_active = 1";
+        $params = [];
+
+        foreach ($criteria as $field => $value) {
+            $sql .= " AND {$field} = :{$field}";
+            $params[$field] = $value;
+        }
+
+        if (!empty($orderBy)) {
+            $order = [];
+            foreach ($orderBy as $field => $direction) {
+                $order[] = "{$field} {$direction}";
+            }
+            $sql .= " ORDER BY " . implode(', ', $order);
+        }
+
+        $sql .= " LIMIT :limit OFFSET :offset";
+        $params['limit'] = $limit;
+        $params['offset'] = $offset;
+
+        return $this->connection->fetchAll($sql, $params);
     }
 }

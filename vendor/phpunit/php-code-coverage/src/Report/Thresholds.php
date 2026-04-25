@@ -13,13 +13,11 @@ use SebastianBergmann\CodeCoverage\InvalidArgumentException;
 
 /**
  * @immutable
- *
- * @no-named-arguments Parameter names are not covered by the backward compatibility promise for phpunit/php-code-coverage
  */
-final readonly class Thresholds
+final class Thresholds
 {
-    private int $lowUpperBound;
-    private int $highLowerBound;
+    private readonly int $lowUpperBound;
+    private readonly int $highLowerBound;
 
     public static function default(): self
     {

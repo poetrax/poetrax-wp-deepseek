@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /*ta_selector*/
 /*<!-- use -->
 <?php echo do_shortcode('[ta_selector]');?>*/

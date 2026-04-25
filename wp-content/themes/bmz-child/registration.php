@@ -138,8 +138,6 @@ class PasswordManager {
 }
 
 
-//2. Класс для работы с пользователями
-
 class UserManager {
     private $db;
     private $errors = [];
@@ -269,7 +267,7 @@ class UserManager {
             return false;
         }
         
-        // Проверяем是否需要更新 хеш
+        // Проверяем хеш
         if (PasswordManager::needsRehash($user['password_hash'])) {
             $this->updatePasswordHash($user['id'], $password);
         }
@@ -336,9 +334,6 @@ class UserManager {
 }
 
 
-//3. Обработчик формы регистрации
-
-// register.php
 require_once 'classes/PasswordManager.php';
 require_once 'classes/UserManager.php';
 
@@ -390,9 +385,7 @@ if ($userId) {
     ]);
 }
 
-//4. Обработчик формы авторизации
 
-// login.php
 require_once 'classes/PasswordManager.php';
 require_once 'classes/UserManager.php';
 
@@ -444,8 +437,7 @@ if ($user) {
     ]);
 }
 
-//5. Обработчик смены пароля
-// change-password.php
+
 require_once 'classes/PasswordManager.php';
 require_once 'classes/UserManager.php';
 

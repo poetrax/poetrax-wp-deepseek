@@ -2,7 +2,7 @@
 FROM composer:2 AS composer
 WORKDIR /app
 COPY . .
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Stage 2: Final image
 FROM php:8.2-apache

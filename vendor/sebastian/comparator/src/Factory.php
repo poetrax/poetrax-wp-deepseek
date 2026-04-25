@@ -14,9 +14,6 @@ use function array_unshift;
 use function extension_loaded;
 use function version_compare;
 
-/**
- * @no-named-arguments Parameter names are not covered by the backward compatibility promise for sebastian/comparator
- */
 final class Factory
 {
     private static ?Factory $instance = null;
@@ -31,9 +28,6 @@ final class Factory
      */
     private array $defaultComparators = [];
 
-    /** @var positive-int */
-    private int $contextLines = 3;
-
     public static function getInstance(): self
     {
         if (self::$instance === null) {
@@ -46,22 +40,6 @@ final class Factory
     public function __construct()
     {
         $this->registerDefaultComparators();
-    }
-
-    /**
-     * @return positive-int
-     */
-    public function contextLines(): int
-    {
-        return $this->contextLines;
-    }
-
-    /**
-     * @param positive-int $contextLines
-     */
-    public function setContextLines(int $contextLines): void
-    {
-        $this->contextLines = $contextLines;
     }
 
     public function getComparatorFor(mixed $expected, mixed $actual): Comparator
@@ -78,9 +56,7 @@ final class Factory
             }
         }
 
-        // @codeCoverageIgnoreStart
         throw new RuntimeException('No suitable Comparator implementation found');
-        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -119,7 +95,6 @@ final class Factory
 
     private function registerDefaultComparators(): void
     {
-        $this->registerDefaultComparator(new ClosureComparator);
         $this->registerDefaultComparator(new MockObjectComparator);
         $this->registerDefaultComparator(new DateTimeComparator);
         $this->registerDefaultComparator(new DOMNodeComparator);

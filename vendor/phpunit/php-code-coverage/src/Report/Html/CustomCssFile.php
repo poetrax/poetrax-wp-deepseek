@@ -14,12 +14,10 @@ use SebastianBergmann\CodeCoverage\InvalidArgumentException;
 
 /**
  * @immutable
- *
- * @no-named-arguments Parameter names are not covered by the backward compatibility promise for phpunit/php-code-coverage
  */
-final readonly class CustomCssFile
+final class CustomCssFile
 {
-    private string $path;
+    private readonly string $path;
 
     public static function default(): self
     {

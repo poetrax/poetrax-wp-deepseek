@@ -9,9 +9,6 @@
  */
 namespace SebastianBergmann\Comparator;
 
-/**
- * @no-named-arguments Parameter names are not covered by the backward compatibility promise for sebastian/comparator
- */
 abstract class Comparator
 {
     private Factory $factory;
@@ -31,17 +28,5 @@ abstract class Comparator
     protected function factory(): Factory
     {
         return $this->factory;
-    }
-
-    /**
-     * @return positive-int
-     */
-    final protected function contextLines(): int
-    {
-        if (!isset($this->factory)) {
-            return 3;
-        }
-
-        return $this->factory->contextLines();
     }
 }

@@ -1,11 +1,22 @@
-<?php
+﻿<?php
+// tests/bootstrap.php
+
+// Автозагрузка Composer
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use BM\Core\Config;
-$config = Config::getInstance();
+// Настройка для тестов
+date_default_timezone_set('UTC');
 
-// Настройка окружения для тестов
-$_ENV['DEEPSEEK_DB_HOST'] = 'poetrax_deepseek_mysql';
-$_ENV['DEEPSEEK_DB_NAME'] = 'u3436142_poetrax_deepseek_db';
-$_ENV['DEEPSEEK_DB_USER'] = 'u3436142_poetrax_deepseek_user';
-$_ENV['DB_PASSWORD'] = 'CI57bdR7m6F9Xem7';
+// Если нужно подключить автозагрузку BM Core
+$bmCoreLoader = __DIR__ . '/../wp-content/mu-plugins/bm-core-loader.php';
+if (file_exists($bmCoreLoader)) {
+    require_once $bmCoreLoader;
+}
+
+// Настройка переменных окружения для тестов
+putenv('APP_ENV=testing');
+
+// Алиасы для обратной совместимости (если нужно)
+if (!class_exists('BM\Core\Repository\PoemRepository') && class_exists('BM\Repositories\PoemRepository')) {
+    class_alias('BM\Repositories\PoemRepository', 'BM\Core\Repository\PoemRepository');
+}

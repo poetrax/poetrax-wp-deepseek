@@ -22,14 +22,12 @@ composer require --dev phpunit/php-code-coverage
 
 ## Usage
 
-### Collecting code coverage data and generating a report
-
 ```php
 <?php declare(strict_types=1);
-use SebastianBergmann\CodeCoverage\CodeCoverage;
-use SebastianBergmann\CodeCoverage\Driver\Selector as DriverSelector;
 use SebastianBergmann\CodeCoverage\Filter;
-use SebastianBergmann\CodeCoverage\Report\Facade as ReportFacade;
+use SebastianBergmann\CodeCoverage\Driver\Selector;
+use SebastianBergmann\CodeCoverage\CodeCoverage;
+use SebastianBergmann\CodeCoverage\Report\Html\Facade as HtmlReport;
 
 $filter = new Filter;
 
@@ -37,12 +35,12 @@ $filter->includeFiles(
     [
         '/path/to/file.php',
         '/path/to/another_file.php',
-    ],
+    ]
 );
 
 $coverage = new CodeCoverage(
-    (new DriverSelector)->forLineCoverage($filter),
-    $filter,
+    (new Selector)->forLineCoverage($filter),
+    $filter
 );
 
 $coverage->start('<name of test>');
@@ -51,17 +49,6 @@ $coverage->start('<name of test>');
 
 $coverage->stop();
 
-ReportFacade::fromObject($coverage)->renderOpenClover('/tmp/openclover.xml');
-```
 
-### Generating a report from serialized code coverage data
-
-```php
-<?php declare(strict_types=1);
-use SebastianBergmann\CodeCoverage\Report\Facade as ReportFacade;
-use SebastianBergmann\CodeCoverage\Serialization\Unserializer;
-
-$data = (new Unserializer)->unserialize('/path/to/coverage.php');
-
-ReportFacade::fromSerializedData($data)->renderOpenClover('/tmp/openclover.xml');
+(new HtmlReport)->process($coverage, '/tmp/code-coverage-report');
 ```

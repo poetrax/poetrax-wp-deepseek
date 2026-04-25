@@ -18,11 +18,6 @@ use DateTime;
 use DateTimeImmutable;
 use DateTimeZone;
 
-/**
- * @no-named-arguments Parameter names are not covered by the backward compatibility promise for sebastian/comparator
- *
- * @internal This class is not covered by the backward compatibility promise for sebastian/comparator
- */
 final class DateTimeComparator extends ObjectComparator
 {
     public function accepts(mixed $expected, mixed $actual): bool
@@ -42,8 +37,6 @@ final class DateTimeComparator extends ObjectComparator
         assert($actual instanceof DateTime || $actual instanceof DateTimeImmutable);
 
         $absDelta = abs($delta);
-
-        /** @phpstan-ignore argument.type */
         $delta    = new DateInterval(sprintf('PT%dS', $absDelta));
         $delta->f = $absDelta - floor($absDelta);
 
@@ -65,7 +58,6 @@ final class DateTimeComparator extends ObjectComparator
                 $expected->format('Y-m-d\TH:i:s.uO'),
                 $actual->format('Y-m-d\TH:i:s.uO'),
                 'Failed asserting that two DateTime objects are equal.',
-                $this->contextLines(),
             );
         }
     }

@@ -18,8 +18,6 @@ use SebastianBergmann\CodeCoverage\XmlException;
 
 /**
  * @internal This class is not covered by the backward compatibility promise for phpunit/php-code-coverage
- *
- * @no-named-arguments Parameter names are not covered by the backward compatibility promise for phpunit/php-code-coverage
  */
 final readonly class Xml
 {
@@ -38,7 +36,6 @@ final readonly class Xml
         $buffer = $document->saveXML();
 
         if ($buffer === false) {
-            // @codeCoverageIgnoreStart
             $message = 'Unable to generate the XML';
 
             foreach (libxml_get_errors() as $error) {
@@ -46,7 +43,6 @@ final readonly class Xml
             }
 
             throw new XmlException($message);
-            // @codeCoverageIgnoreEnd
         }
 
         libxml_clear_errors();

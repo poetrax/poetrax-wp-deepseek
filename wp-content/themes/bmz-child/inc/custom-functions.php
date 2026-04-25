@@ -1,12 +1,14 @@
 <?php
 // inc/custom-functions.php
 // Вспомогательные функции, работа с БД, аудио, редиректы и т.д.
-use BM\Database\Connection;
 //use BM\Cache\AdvancedPropertiesCache;
 //use BM\Cache\PropertiesConfig;
 //use BM\Cache\PropertiesCacheManager;
 //use BM\Cache\AjaxPropertiesHandler;
 //use BM\Cache\CacheInterface;
+use BM\Database\Connection;
+
+
 /**
  * Глобальные переменные
  */
