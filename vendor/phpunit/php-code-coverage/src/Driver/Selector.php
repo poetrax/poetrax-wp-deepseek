@@ -14,6 +14,9 @@ use SebastianBergmann\CodeCoverage\NoCodeCoverageDriverAvailableException;
 use SebastianBergmann\CodeCoverage\NoCodeCoverageDriverWithPathCoverageSupportAvailableException;
 use SebastianBergmann\Environment\Runtime;
 
+/**
+ * @no-named-arguments Parameter names are not covered by the backward compatibility promise for phpunit/php-code-coverage
+ */
 final class Selector
 {
     /**
@@ -21,6 +24,7 @@ final class Selector
      * @throws PcovNotAvailableException
      * @throws XdebugNotAvailableException
      * @throws XdebugNotEnabledException
+     * @throws XdebugVersionNotSupportedException
      */
     public function forLineCoverage(Filter $filter): Driver
     {
@@ -31,11 +35,7 @@ final class Selector
         }
 
         if ($runtime->hasXdebug()) {
-            $driver = new XdebugDriver($filter);
-
-            $driver->enableDeadCodeDetection();
-
-            return $driver;
+            return new XdebugDriver($filter);
         }
 
         throw new NoCodeCoverageDriverAvailableException;
@@ -45,13 +45,13 @@ final class Selector
      * @throws NoCodeCoverageDriverWithPathCoverageSupportAvailableException
      * @throws XdebugNotAvailableException
      * @throws XdebugNotEnabledException
+     * @throws XdebugVersionNotSupportedException
      */
     public function forLineAndPathCoverage(Filter $filter): Driver
     {
         if ((new Runtime)->hasXdebug()) {
             $driver = new XdebugDriver($filter);
 
-            $driver->enableDeadCodeDetection();
             $driver->enableBranchAndPathCoverage();
 
             return $driver;

@@ -45,7 +45,7 @@ class PoetRepository extends AbstractRepository
     public function searchByName(string $query, int $limit = 20)
     {
         $sql = "
-            SELECT * FROM {$this->table}
+            SELECT * FROM {$this->getTableName()}
             WHERE (first_name LIKE :query 
                 OR last_name LIKE :query 
                 OR second_name LIKE :query)
@@ -67,7 +67,7 @@ class PoetRepository extends AbstractRepository
     public function getRandom(int $limit = 3)
     {
         $sql = "
-            SELECT * FROM {$this->table}
+            SELECT * FROM {$this->getTableName()}
             WHERE is_active = 1 AND is_approved = 1
             ORDER BY RAND()
             LIMIT :limit
@@ -82,7 +82,7 @@ class PoetRepository extends AbstractRepository
     public function getRecent(int $limit = 10)
     {
         $sql = "
-            SELECT * FROM {$this->table}
+            SELECT * FROM {$this->getTableName()}
             WHERE is_active = 1 AND is_approved = 1
             ORDER BY created_at DESC
             LIMIT :limit
@@ -106,4 +106,6 @@ class PoetRepository extends AbstractRepository
         
         return implode('—', $years);
     }
+
+
 }

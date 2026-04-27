@@ -230,7 +230,7 @@ function ta_music_selector_code($type) {
         $table = $table_map[$type];
         $query = "SELECT id, name, suno_prompt FROM {$table} WHERE is_active = 1 ORDER BY name";
         
-        $items = Pdo::query($query);
+        $items = Connection::query($query);
         $name_group = $name_group_map[$type];
 
         return build_ta($items, $type, $name_group);
@@ -309,7 +309,7 @@ function get_audio_tracks_from_db($limit, $type) {
         $query .= " LIMIT {$limit}";
     }
     
-    $results = Pdo::query($query, [$current_user_id]);
+    $results = Connection::query($query, [$current_user_id]);
     return $results;
 }
 

@@ -1,4 +1,52 @@
 <?php
+namespace BM\Core\User;
+
+
+class UserManager
+{
+    use BM\Core\Database\Connection;
+    use BM\Core\Database\Connection;
+
+    private Connection $db;
+
+    public function __construct(Connection $db)
+    {
+        $this->db = $db;
+    }
+
+    public function findOrCreate(array $data): array
+    {
+        $email = $data['your_email'] ?? null;
+
+        if (!$email) {
+            throw new \InvalidArgumentException('Email is required');
+        }
+
+        // Ищем пользователя
+        $user = $this->db
+            ->query("SELECT * FROM bm_ctbl000_user WHERE user_email = ?", [$email])
+            ->fetch();
+
+        // Создаём если нет
+        if (!$user) {
+            $this->db->query(
+                "INSERT INTO bm_ctbl000_user (user_email, created_at) VALUES (?, NOW())",
+                [$email]
+            );
+
+            $user = $this->db
+                ->query("SELECT * FROM bm_ctbl000_user WHERE user_email = ?", [$email])
+                ->fetch();
+        }
+
+        return $user;
+    }
+}
+
+// Использование:
+//$userManager = new UserManager($connection);
+//$user = $userManager->findOrCreate(['your_email' => 'test@example.com']);
+
 
 function process_form_data($data) {
 
@@ -50,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     
         try {
-            Pdo::beginTransaction();
+            Connection::beginTransaction();
         
             //Поиск или создание пользователя
             $user = findOrCreateUser($_POST);
@@ -68,8 +116,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
             //Обработка предложений стилей/жанров
             processStyleGenreSuggestions($track_id, $user['id'], $_POST);
-        
-            Pdo::commit();
+
+            Connection::commit();
         
             // Успешный ответ
             echo json_encode([
@@ -78,68 +126,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'track_id' => $track_id
             ]);
         
-        } catch (Exception $e) {
-            Pdo::rollBack();
+        } catch (\Exception $e) {
+            Connection::rollBack();
             http_response_code(500);
             echo json_encode(['success' => false, 'error' => 'Ошибка при сохранении заказа: ' . $e->getMessage()]);
         }
     }
-}
-// Вспомогательные функции
-function findOrCreateUser($data) {
-    global $pdo;
-    $query = "SELECT * FROM bm_ctbl000_user WHERE user_email = ?";
-    $user=Pdo::query($query,[$data['your_email']]);
-    if ($user) {
-        // Полное обновление пользователя
-        // Готовим запрос только для тех полей, которые есть в форме и не пусты
-        $update_fields = [];
-        $update_params = [];
-        
-        $field_mapping = [
-            'your_name' => 'user_first_name',
-            'your_last_name' => 'user_last_name', 
-            'your_display_name' => 'display_name',
-            'mask_phone' => 'user_phone',
-            'your_url' => 'user_url'
-        ];
-        
-        foreach ($field_mapping as $form_field => $db_field) {
-            if (!empty($data[$form_field])) {
-                if (empty($user[$db_field]) || true) {
-                    $update_fields[] = "{$db_field} = ?";
-                    $update_params[] = trim($data[$form_field]);
-                }
-            }
-        }
 
-        if (!empty($update_fields)) {
-            $update_params[] = $user['id'];
-            $sql = "UPDATE bm_ctbl000_user SET " . implode(', ', $update_fields) . " WHERE id = ?";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$update_params]);
-        }
-        return $user;
-        
-    } else {
-        // Создание нового пользователя
-        $stmt = $pdo->prepare("
-        INSERT INTO bm_ctbl000_user 
-            (user_first_name, user_last_name, display_name, user_email, user_phone, user_url, user_registered) 
-            VALUES (?, ?, ?, ?, ?, ?, NOW())
-        ");
-        $stmt->execute([
-            trim($data['your_name']),
-            trim($data['your_last_name']), 
-            trim($data['your_display_name']),
-            trim($data['your_email']),
-            trim($data['mask_phone']),
-            trim($data['your_url'])
-        ]);
-        
-        return ['id' => $pdo->lastInsertId()];
-    }
-}
 
 function createTrackOrder($user_id, $data) {
    global $pdo;
@@ -383,7 +376,7 @@ function findOrCreateUser($data) {
         if (!empty($update_fields)) {
             $update_params[] = $user['id'];
             $query = "UPDATE bm_ctbl000_user SET " . implode(', ', $update_fields) . " WHERE id = ?";
-            Pdo::query($query,[$update_params]);
+            Connection::query($query,[$update_params]);
         }
         
         return $user;
@@ -556,3 +549,5 @@ function processStyleGenreSuggestions($track_id, $user_id, $data) {
 }
 
 */
+
+}

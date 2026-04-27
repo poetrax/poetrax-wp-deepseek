@@ -2,7 +2,7 @@
 namespace BM\Core\Repository;
 
 use BM\Core\Repository\AbstractRepository;
-use BM\Core\Config\TableMapper;
+use BM\Core\Database\TableMapper;
 
 class UserRepository extends AbstractRepository
 {

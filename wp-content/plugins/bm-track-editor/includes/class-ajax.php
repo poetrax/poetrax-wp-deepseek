@@ -1,6 +1,6 @@
 <?php
 use BM\Database\Connection;
-use BM\Core\Config\TableMapper;
+use BM\Core\Database\TableMapper;
 
 /**
  * AJAX обработчики

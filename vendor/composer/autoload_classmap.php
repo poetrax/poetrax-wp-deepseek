@@ -6,7 +6,6 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Attribute' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'PHPUnit\\Event\\Application\\Finished' => $vendorDir . '/phpunit/phpunit/src/Event/Events/Application/Finished.php',
     'PHPUnit\\Event\\Application\\FinishedSubscriber' => $vendorDir . '/phpunit/phpunit/src/Event/Events/Application/FinishedSubscriber.php',
@@ -1107,7 +1106,6 @@ return array(
     'PharIo\\Version\\VersionConstraintParser' => $vendorDir . '/phar-io/version/src/VersionConstraintParser.php',
     'PharIo\\Version\\VersionConstraintValue' => $vendorDir . '/phar-io/version/src/VersionConstraintValue.php',
     'PharIo\\Version\\VersionNumber' => $vendorDir . '/phar-io/version/src/VersionNumber.php',
-    'PhpToken' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
     'SebastianBergmann\\CliParser\\AmbiguousOptionException' => $vendorDir . '/sebastian/cli-parser/src/exceptions/AmbiguousOptionException.php',
     'SebastianBergmann\\CliParser\\Exception' => $vendorDir . '/sebastian/cli-parser/src/exceptions/Exception.php',
     'SebastianBergmann\\CliParser\\OptionDoesNotAllowArgumentException' => $vendorDir . '/sebastian/cli-parser/src/exceptions/OptionDoesNotAllowArgumentException.php',
@@ -1163,6 +1161,7 @@ return array(
     'SebastianBergmann\\CodeCoverage\\Report\\Html\\Facade' => $vendorDir . '/phpunit/php-code-coverage/src/Report/Html/Facade.php',
     'SebastianBergmann\\CodeCoverage\\Report\\Html\\File' => $vendorDir . '/phpunit/php-code-coverage/src/Report/Html/Renderer/File.php',
     'SebastianBergmann\\CodeCoverage\\Report\\Html\\Renderer' => $vendorDir . '/phpunit/php-code-coverage/src/Report/Html/Renderer.php',
+    'SebastianBergmann\\CodeCoverage\\Report\\Html\\SyntaxHighlighter' => $vendorDir . '/phpunit/php-code-coverage/src/Report/Html/SyntaxHighlighter.php',
     'SebastianBergmann\\CodeCoverage\\Report\\OpenClover' => $vendorDir . '/phpunit/php-code-coverage/src/Report/OpenClover.php',
     'SebastianBergmann\\CodeCoverage\\Report\\Summary' => $vendorDir . '/phpunit/php-code-coverage/src/Report/Summary.php',
     'SebastianBergmann\\CodeCoverage\\Report\\Text' => $vendorDir . '/phpunit/php-code-coverage/src/Report/Text.php',
@@ -1233,6 +1232,8 @@ return array(
     'SebastianBergmann\\CodeCoverage\\UnintentionallyCoveredCodeChecker' => $vendorDir . '/phpunit/php-code-coverage/src/UnintentionallyCoveredCodeChecker.php',
     'SebastianBergmann\\CodeCoverage\\UnintentionallyCoveredCodeException' => $vendorDir . '/phpunit/php-code-coverage/src/Exception/UnintentionallyCoveredCodeException.php',
     'SebastianBergmann\\CodeCoverage\\Util\\DirectoryCouldNotBeCreatedException' => $vendorDir . '/phpunit/php-code-coverage/src/Exception/DirectoryCouldNotBeCreatedException.php',
+    'SebastianBergmann\\CodeCoverage\\Util\\EnsuresUtf8' => $vendorDir . '/phpunit/php-code-coverage/src/Util/EnsuresUtf8.php',
+    'SebastianBergmann\\CodeCoverage\\Util\\EnsuresUtf8Test' => $vendorDir . '/phpunit/php-code-coverage/src/Util/EnsuresUtf8Test.php',
     'SebastianBergmann\\CodeCoverage\\Util\\Filesystem' => $vendorDir . '/phpunit/php-code-coverage/src/Util/Filesystem.php',
     'SebastianBergmann\\CodeCoverage\\Util\\PathReducer' => $vendorDir . '/phpunit/php-code-coverage/src/Util/PathReducer.php',
     'SebastianBergmann\\CodeCoverage\\Util\\Percentage' => $vendorDir . '/phpunit/php-code-coverage/src/Util/Percentage.php',
@@ -1346,7 +1347,6 @@ return array(
     'SebastianBergmann\\Type\\UnknownType' => $vendorDir . '/sebastian/type/src/type/UnknownType.php',
     'SebastianBergmann\\Type\\VoidType' => $vendorDir . '/sebastian/type/src/type/VoidType.php',
     'SebastianBergmann\\Version' => $vendorDir . '/sebastian/version/src/Version.php',
-    'Stringable' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
     'TheSeer\\Tokenizer\\Exception' => $vendorDir . '/theseer/tokenizer/src/Exception.php',
     'TheSeer\\Tokenizer\\NamespaceUri' => $vendorDir . '/theseer/tokenizer/src/NamespaceUri.php',
     'TheSeer\\Tokenizer\\NamespaceUriException' => $vendorDir . '/theseer/tokenizer/src/NamespaceUriException.php',
@@ -1355,8 +1355,6 @@ return array(
     'TheSeer\\Tokenizer\\TokenCollectionException' => $vendorDir . '/theseer/tokenizer/src/TokenCollectionException.php',
     'TheSeer\\Tokenizer\\Tokenizer' => $vendorDir . '/theseer/tokenizer/src/Tokenizer.php',
     'TheSeer\\Tokenizer\\XMLSerializer' => $vendorDir . '/theseer/tokenizer/src/XMLSerializer.php',
-    'UnhandledMatchError' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
-    'ValueError' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
     'staabm\\SideEffectsDetector\\SideEffect' => $vendorDir . '/staabm/side-effects-detector/lib/SideEffect.php',
     'staabm\\SideEffectsDetector\\SideEffectsDetector' => $vendorDir . '/staabm/side-effects-detector/lib/SideEffectsDetector.php',
 );

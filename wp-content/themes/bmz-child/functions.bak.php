@@ -708,7 +708,7 @@ function ta_music_selector_code($type) {
         $table = $table_map[$type];
         $query = "SELECT id, name, suno_prompt FROM {$table} WHERE is_active = 1 ORDER BY name";
         
-        $items = Pdo::query($query);
+        $items = Connection::query($query);
        
         $name_group = $name_group_map[$type];
 
@@ -757,7 +757,7 @@ function handle_get_poems() {
 
       
         $properties = [];
-        $properties = Pdo::query($query);
+        $properties = Connection::query($query);
    
 
         // Используем только один метод вывода
@@ -1000,7 +1000,7 @@ function donate_shortcode() {
         ';
         $current_user_id = get_current_user_id();
      
-        $user = Pdo::query($query,[$current_user_id])
+        $user = Connection::query($query,[$current_user_id])
 
         $user_email = empty($user['user_email']) ? '' : $user['user_email'];
         $user_phone = empty($user['user_phone']) ? '' : $user['user_phone'];
@@ -1181,7 +1181,7 @@ function get_audio_tracks_from_db($limit, $type) {
      $time = strtotime('-1 month', time());
     //$time = date('d.m.Y H:i:s', $time); // 03.09.2025 07:50:07 
      
-    $results = Pdo::query($query,[$current_user_id]);
+    $results = Connection::query($query,[$current_user_id]);
     return $results;
 }
 

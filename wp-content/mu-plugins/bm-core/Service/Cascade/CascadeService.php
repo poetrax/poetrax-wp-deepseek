@@ -41,7 +41,7 @@ class UniversalCascadeSystem {
         $cascade_type = htmlspecialchars($_POST['cascade_type'] ?? '');
         
         if (empty($cascade_type) || !isset($this->cascade_config[$cascade_type])) {
-            throw new Exception('Invalid cascade type');
+            throw new \Exception('Invalid cascade type');
         }
 
         $config = $this->cascade_config[$cascade_type];
@@ -49,7 +49,7 @@ class UniversalCascadeSystem {
 
        return ['success' => true, 'data' => $data];
 
-    } catch (Exception $exception) {
+    } catch (\Exception $exception) {
         throw new \Exception();
     }
     
@@ -98,7 +98,7 @@ class UniversalCascadeSystem {
 
         return array_values($categories);
         }
-        catch(Exception $e)
+        catch(\Exception $e)
         {
             throw new \Exception();
         }

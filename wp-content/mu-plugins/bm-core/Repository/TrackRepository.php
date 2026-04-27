@@ -2,7 +2,7 @@
 namespace BM\Core\Repository;
 
 use BM\Core\Database\QueryBuilder;
-use BM\Core\Config\TableMapper;
+use BM\Core\Database\TableMapper;
 
 class TrackRepository extends AbstractRepository
 {
@@ -82,28 +82,7 @@ class TrackRepository extends AbstractRepository
             ->get();
     }
 
-    /**
-     * Получить популярные треки (по количеству прослушиваний)
-     */
-    public function getPopular(int $limit = 10): array
-    {
-        $limit = min($limit, self::MAX_LIMIT);
-        $interactionTable = TableMapper::getInstance()->get('interaction');
-        $table = $this->getTableName();
-
-        $sql = "
-        SELECT t.*, COUNT(i.id) as plays_count
-        FROM {$table} t
-        LEFT JOIN {$interactionTable} i 
-            ON t.id = i.track_id AND i.type = 'play'
-        WHERE t.is_approved = 1 AND t.is_active = 1
-        GROUP BY t.id
-        ORDER BY plays_count DESC
-        LIMIT :limit
-    ";
-
-        return $this->connection->fetchAll($sql, ['limit' => $limit]);
-    }
+    
 
     /**
      * Получить новые треки
@@ -167,30 +146,7 @@ class TrackRepository extends AbstractRepository
         return true;
     }
 
-    /**
-     * Получить пагинированные треки
-     */
-    public function getPaginated(?int $page = null, ?int $limit = null): array
-    {
-        $defaultPage = $this->config['pagination']['default_page'] ?? 1;
-        $defaultLimit = $this->config['pagination']['default_limit'] ?? 20;
-        $maxLimit = $this->config['pagination']['max_limit'] ?? 100;
-
-        $page = $page ?? $defaultPage;
-        $limit = $limit ?? $defaultLimit;
-        $limit = min($limit, $maxLimit);
-
-        return $this->queryBuilder
-            ->reset()
-            ->table($this->getTableName())
-            ->where(self::FIELD_IS_APPROVED, 1)
-            ->where(self::FIELD_IS_ACTIVE, 1)
-            ->orderBy(self::FIELD_CREATED_AT, 'DESC')
-            ->paginate($page, $limit);
-    }
-	
-	
-	
+   	
 /**
  * Get filtered tracks with pagination
  * 
@@ -282,9 +238,31 @@ public function getFiltered(array $filters, int $page = 1, int $limit = 20): arr
     }
 
     /**
+     * Получить пагинированные треки
+     */
+    public function getPaginated(?int $page = null, ?int $limit = null): array
+    {
+        $defaultPage = $this->config['pagination']['default_page'] ?? 1;
+        $defaultLimit = $this->config['pagination']['default_limit'] ?? 20;
+        $maxLimit = $this->config['pagination']['max_limit'] ?? 100;
+
+        $page = $page ?? $defaultPage;
+        $limit = $limit ?? $defaultLimit;
+        $limit = min($limit, $maxLimit);
+
+        return $this->queryBuilder
+            ->reset()
+            ->table($this->getTableName())
+            ->where(self::FIELD_IS_APPROVED, 1)
+            ->where(self::FIELD_IS_ACTIVE, 1)
+            ->orderBy(self::FIELD_CREATED_AT, 'DESC')
+            ->paginate($page, $limit);
+    }
+
+    /**
      * Получить треки с пагинацией (с кэшем)
      */
-    public function getPaginated(int $page = 1, int $limit = 20): array
+    public function getPaginatedCache(int $page = 1, int $limit = 20): array
     {
         $key = "tracks:paginated";
 

@@ -1,23 +1,19 @@
 <?php
-//namespace BM\Core;
-//use BM\Core\Controller\TrackController;
+namespace BM\Core;
+use PDO;
+
 require_once __DIR__ . '/vendor/autoload.php';
-ob_start();
+require_once __DIR__ . '/wp-content/mu-plugins/bm-core-loader.php';
 
-// ============================================
-// CORS
-// ============================================
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
-header("Access-Control-Max-Age: 86400");
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
 
-// Обработка preflight-запросов
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
+ob_start(); // буферизация вывода
 
+
+// Диагностика — временно
+$requestUri = $_SERVER['REQUEST_URI'];
+file_put_contents(__DIR__ . '/debug.log', date('Y-m-d H:i:s') . " - " . $requestUri . PHP_EOL, FILE_APPEND);
 
 $_ENV['DEEPSEEK_DB_HOST'] = 'poetrax_deepseek_mysql';
 $_ENV['DEEPSEEK_DB_NAME'] = 'u3436142_poetrax_deepseek_db';
@@ -34,35 +30,188 @@ $dbConfig = [
 use BM\Core\Database\Connection;
 use BM\Core\Database\Cache;
 use BM\Core\Database\Loader;
-use BM\Core\Router;
-use BM\Core\Controller\TrackController;
-use BM\Core\Controller\FilterController;
-use BM\Core\Controller\RecommendationController;
-use BM\Core\Cache\CacheManager;
 use BM\Core\Config;
 
-$config = Config::getInstance();
 $connection = Connection::getInstance($dbConfig);
 $cache = Cache::getInstance();
-$cacheManager = new CacheManager($cache, $connection);
 $loader = new Loader($connection, $cache, $config);
-$warmupTtl = $config->get('cache.warmup_ttl', 86400);
-
+$config = Config::getInstance();
+$config->get('key');
+$warmupTtl = $config->get('cache.warmup_ttl') ?? 86400;
 if (!$cache->has('table:warmed_up')) {
     $loader->warmupCache();
     $cache->set('table:warmed_up', time(), $warmupTtl);
 }
 
-// Сессии (опционально)
+// ============================================
+// МАРШРУТИЗАЦИЯ
+// ============================================
+$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$method = $_SERVER['REQUEST_METHOD'];
+
+// GET /api/tracks
+if ($requestUri === '/api/tracks' && $method === 'GET') {
+    header('Content-Type: application/json');
+    $pdo = Connection::getPDO();
+    $stmt = $pdo->query("SELECT * FROM bm_ctbl000_track LIMIT 50");
+    $tracks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	echo json_encode(['success' => true, 'data' => $tracks]);
+    exit;
+}
+
+
+// GET /api/tracks/popular
+if ($requestUri === '/api/tracks/popular' && $method === 'GET') {
+    header('Content-Type: application/json');
+    $pdo = Connection::getPDO();
+    $stmt = $pdo->query("SELECT * FROM bm_ctbl000_track ORDER BY count_play DESC LIMIT 10");
+    $tracks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode(['success' => true, 'data' => $tracks]);
+    exit;
+}
+
+// GET /api/tracks/{id}
+if (preg_match('#^/api/tracks/(\d+)$#', $requestUri, $matches) && $method === 'GET') {
+    header('Content-Type: application/json');
+    $id = (int)$matches[1];
+    $pdo = Connection::getPDO();
+    $stmt = $pdo->prepare("SELECT * FROM bm_ctbl000_track WHERE id = ?");
+    $stmt->execute([$id]);
+    $track = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$track) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'error' => 'Track not found']);
+        exit;
+    }
+    echo json_encode(['success' => true, 'data' => $track]);
+    exit;
+}
+
+
+/*
+// ==================================================
+// ЖЕСТКИЙ ИСПРАВЛЕННЫЙ ПОИСК
+// ==================================================
+if ($requestUri === '/api/tracks/search' && $method === 'GET') {
+    // Отключаем вывод любых ошибок в браузер, чтобы они не сломали JSON
+    error_reporting(0);
+    ini_set('display_errors', 0);
+    
+    header('Content-Type: application/json');
+    
+    // 1. Получаем и чистим параметр
+    $raw_query = trim($_GET['q'] ?? '');
+    $query = htmlspecialchars(strip_tags($raw_query));
+    
+    // 2. Если строка короткая — пустой результат
+    if (mb_strlen($query, 'UTF-8') < 2) {
+        echo json_encode(['success' => true, 'data' => []], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    
+    try {
+        // 3. Прямое подключение через PDO
+        $pdo = new PDO(
+            "mysql:host=poetrax_deepseek_mysql;dbname=u3436142_poetrax_deepseek_db;charset=utf8mb4",
+            "u3436142_poetrax_deepseek_user",
+            "CI57bdR7m6F9Xem7"
+        );
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // 4. Готовим запрос с явным указанием нативной строки
+        $sql = "SELECT * FROM bm_ctbl000_track WHERE track_name LIKE :search LIMIT 20";
+        $stmt = $pdo->prepare($sql);
+        
+        // 5. КЛЮЧЕВОЙ МОМЕНТ: формируем строку для поиска и принудительно указываем кодировку
+        $search_param = '%' . $query . '%';
+        $stmt->bindParam(':search', $search_param, PDO::PARAM_STR);
+        
+        $stmt->execute();
+        $tracks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // 6. Отдаём результат
+        echo json_encode(['success' => true, 'data' => $tracks], JSON_UNESCAPED_UNICODE);
+        
+    } catch (PDOException $e) {
+        // В случае ошибки возвращаем JSON с ошибкой, а не пустой массив
+        echo json_encode([
+            'success' => false, 
+            'error' => 'Database error: ' . $e->getMessage(),
+            'query_received' => $query
+        ], JSON_UNESCAPED_UNICODE);
+    }
+    exit;
+}
+*/
+
+
+// GET /api/tracks/search
+
+//временно
+file_put_contents('/tmp/search_debug.log', print_r($_GET, true) . PHP_EOL, FILE_APPEND);
+//временно
+
+if ($requestUri === '/api/tracks/search' && $method === 'GET') {
+    header('Content-Type: application/json');
+    $query = trim($_GET['q'] ?? '');
+    if (strlen($query) < 2) {
+        echo json_encode(['success' => true, 'data' => []]);
+        exit;
+    }
+    
+    $pdo = Connection::getPDO();
+    $stmt = $pdo->prepare("SELECT * FROM bm_ctbl000_track WHERE track_name LIKE ? LIMIT 20");
+    $stmt->execute(["%$query%"]);
+    $tracks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    echo json_encode(['success' => true, 'data' => $tracks]);
+    exit;
+}
+
+
+
+// GET /api/recommendations/user
+if ($requestUri === '/api/recommendations/user' && $method === 'GET') {
+    header('Content-Type: application/json');
+    $userId = (int)($_GET['user_id'] ?? 0);
+    // Заглушка
+    $pdo = Connection::getPDO();
+    $stmt = $pdo->query("SELECT * FROM bm_ctbl000_track ORDER BY RAND() LIMIT 5");
+    $tracks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode(['success' => true, 'data' => $tracks]);
+    exit;
+}
+
+// GET /api/recommendations/track/{id}
+if (preg_match('#^/api/recommendations/track/(\d+)$#', $requestUri, $matches) && $method === 'GET') {
+    header('Content-Type: application/json');
+    $trackId = (int)$matches[1];
+    // Заглушка
+    $pdo = Connection::getPDO();
+    $stmt = $pdo->prepare("SELECT * FROM bm_ctbl000_track WHERE id != ? LIMIT 5");
+    $stmt->execute([$trackId]);
+    $tracks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode(['success' => true, 'data' => $tracks]);
+    exit;
+}
+
+// 404
+http_response_code(404);
+echo json_encode(['success' => false, 'error' => 'Endpoint not found']);
+
+
+// Запускаем сессию для авторизации
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 
-// ============================================
-// РОУТЕР
-// ============================================
+// Создаём роутер
 $router = new Router();
+
+// ============================================
+// API маршруты
+// ============================================
 
 // Треки
 $router->get('/api/tracks', [TrackController::class, 'index']);
@@ -75,12 +224,19 @@ $router->post('/api/tracks/{id}/play', [TrackController::class, 'play']);
 $router->post('/api/tracks/{id}/like', [TrackController::class, 'like']);
 $router->delete('/api/tracks/{id}/like', [TrackController::class, 'unlike']);
 
-// Фильтры
+// ============================================
+// Запуск
+// ============================================
+
+$router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
+
 $router->post('/api/filter/tracks', [FilterController::class, 'filter']);
 $router->post('/api/filter/poets', [FilterController::class, 'filter']);
 $router->post('/api/filter/poems', [FilterController::class, 'filter']);
 $router->post('/api/filter/users', [FilterController::class, 'filter']);
 $router->get('/api/filter/{entity}/available', [FilterController::class, 'availableFilters']);
+
+// Фильтрация сущностей через свойства треков
 $router->post('/api/filter/poets/by-track-properties', [FilterController::class, 'filterPoetsByTrackProperties']);
 $router->post('/api/filter/poems/by-track-properties', [FilterController::class, 'filterPoemsByTrackProperties']);
 $router->post('/api/filter/users/by-track-properties', [FilterController::class, 'filterUsersByTrackProperties']);
@@ -93,77 +249,3 @@ $router->get('/api/recommendations/new', [RecommendationController::class, 'newR
 $router->get('/api/recommendations/trending', [RecommendationController::class, 'trending']);
 $router->get('/api/recommendations/poet/{id}', [RecommendationController::class, 'forPoet']);
 $router->get('/api/recommendations/poem/{id}', [RecommendationController::class, 'forPoem']);
-
-// Поэмы
-$router->get('/api/poems', [PoemController::class, 'index']);
-$router->get('/api/poems/{id}', [PoemController::class, 'show']);
-$router->get('/api/poems/search', [PoemController::class, 'search']);
-$router->get('/api/poems/by-poet/{poetId}', [PoemController::class, 'byPoet']);
-$router->get('/api/poems/{id}/text', [PoemController::class, 'text']);
-
-// Поэты (дополнительные маршруты)
-$router->get('/api/poets/{id}/details', [PoetController::class, 'details']);
-$router->get('/api/poets/stats', [PoetController::class, 'stats']);
-
-// Блокировки
-$router->get('/api/blocks/my', [BlockController::class, 'myBlocks']);
-$router->get('/api/blocks/on-me', [BlockController::class, 'blocksOnMe']);
-$router->get('/api/blocks/check', [BlockController::class, 'check']);
-$router->post('/api/blocks', [BlockController::class, 'store']);
-$router->delete('/api/blocks/{id}', [BlockController::class, 'delete']);
-
-// Сервис доступа
-$router->get('/api/services', [ServiceController::class, 'index']);
-$router->get('/api/services/check', [ServiceController::class, 'check']);
-$router->post('/api/services/{slug}/buy', [ServiceController::class, 'buy']);
-
-// Сообщения
-$router->get('/api/messages/inbox', [MessageController::class, 'inbox']);
-$router->get('/api/messages/sent', [MessageController::class, 'sent']);
-$router->get('/api/messages/unread/count', [MessageController::class, 'unreadCount']);
-$router->get('/api/messages/{id}', [MessageController::class, 'show']);
-$router->post('/api/messages', [MessageController::class, 'store']);
-$router->delete('/api/messages/{id}', [MessageController::class, 'delete']);
-
-// Мерч
-$router->get('/api/products', [ProductController::class, 'index']);
-$router->get('/api/products/{id}', [ProductController::class, 'show']);
-$router->get('/api/products/slug/{slug}', [ProductController::class, 'showBySlug']);
-$router->get('/api/cart', [CartController::class, 'index']);
-$router->post('/api/cart/items', [CartController::class, 'addItem']);
-$router->put('/api/cart/items/{id}', [CartController::class, 'updateItem']);
-$router->delete('/api/cart/items/{id}', [CartController::class, 'removeItem']);
-$router->delete('/api/cart', [CartController::class, 'clear']);
-$router->get('/api/orders', [OrderController::class, 'index']);
-$router->get('/api/orders/{id}', [OrderController::class, 'show']);
-$router->post('/api/orders', [OrderController::class, 'store']);
-
-// Корзина
-$router->get('/api/cart', [CartController::class, 'index']);
-$router->post('/api/cart/items', [CartController::class, 'addItem']);
-$router->put('/api/cart/items/{id}', [CartController::class, 'updateItem']);
-$router->delete('/api/cart/items/{id}', [CartController::class, 'removeItem']);
-$router->delete('/api/cart', [CartController::class, 'clear']);
-
-// Заказы
-$router->get('/api/orders', [OrderController::class, 'index']);
-$router->get('/api/orders/{id}', [OrderController::class, 'show']);
-$router->post('/api/orders', [OrderController::class, 'store']);
-
-
-// Блокировки
-$router->get('/api/blocks/my', [BlockController::class, 'myBlocks']);
-$router->get('/api/blocks/on-me', [BlockController::class, 'blocksOnMe']);
-$router->get('/api/blocks/check', [BlockController::class, 'check']);
-$router->post('/api/blocks', [BlockController::class, 'store']);
-$router->delete('/api/blocks/{id}', [BlockController::class, 'delete']);
-
-// Сервис доступа
-$router->get('/api/services', [ServiceController::class, 'index']);
-$router->get('/api/services/check', [ServiceController::class, 'check']);
-$router->post('/api/services/{slug}/buy', [ServiceController::class, 'buy']);
-
-
-// Запуск
-$router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
-

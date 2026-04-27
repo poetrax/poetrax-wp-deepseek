@@ -49,7 +49,7 @@ class InteractionRepository extends AbstractRepository
         }
 
         $sql = "
-            DELETE FROM {$this->table}
+            DELETE FROM {$this->getTableName()}
             WHERE track_id = :track_id AND user_id = :user_id AND type = :type
         ";
 
@@ -66,7 +66,7 @@ class InteractionRepository extends AbstractRepository
     public function hasInteraction(int $trackId, int $userId, string $type): bool
     {
         $sql = "
-            SELECT COUNT(*) as count FROM {$this->table}
+            SELECT COUNT(*) as count FROM {$this->getTableName()}
             WHERE track_id = :track_id AND user_id = :user_id AND type = :type
         ";
 
@@ -163,7 +163,7 @@ class InteractionRepository extends AbstractRepository
                 COUNT(*) as total_shares,
                 COUNT(DISTINCT user_id) as unique_sharers,
                 metadata
-            FROM {$this->table}
+            FROM {$this->getTableName()}
             WHERE track_id = :track_id AND type = 'share'
         ";
 
@@ -198,7 +198,7 @@ class InteractionRepository extends AbstractRepository
     {
         $sql = "
             SELECT track_id, COUNT(*) as share_count
-            FROM {$this->table}
+            FROM {$this->getTableName()}
             WHERE type = 'share'
             GROUP BY track_id
             ORDER BY share_count DESC
@@ -249,7 +249,7 @@ class InteractionRepository extends AbstractRepository
                 COUNT(CASE WHEN type = 'share' THEN 1 END) as shares,
                 COUNT(CASE WHEN type = 'recommend' THEN 1 END) as recommends,
                 COALESCE(SUM(CASE WHEN type = 'play' THEN JSON_EXTRACT(metadata, '$.duration') ELSE 0 END), 0) as total_duration
-            FROM {$this->table}
+            FROM {$this->getTableName()}
             WHERE track_id = :track_id
         ";
 
@@ -270,7 +270,7 @@ class InteractionRepository extends AbstractRepository
      */
     public function getUserTrackIds(int $userId, ?string $type = null, int $limit = 50): array
     {
-        $sql = "SELECT track_id FROM {$this->table} WHERE user_id = :user_id";
+        $sql = "SELECT track_id FROM {$this->getTableName()} WHERE user_id = :user_id";
         $params = ['user_id' => $userId];
 
         if ($type) {
@@ -299,7 +299,7 @@ class InteractionRepository extends AbstractRepository
 
         $sql = "
             SELECT track_id, COUNT(*) as interaction_count
-            FROM {$this->table}
+            FROM {$this->getTableName()}
             WHERE type = :type 
                 AND created_at > NOW() - INTERVAL {$interval}
             GROUP BY track_id

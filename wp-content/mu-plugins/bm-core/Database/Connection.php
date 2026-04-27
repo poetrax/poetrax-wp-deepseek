@@ -88,7 +88,8 @@ class Connection
         return true;
     }
 
-    // query()
+
+    // 3. query()
     public function query($sql, $params = [])
     {
         $stmt = $this->pdo->prepare($sql);
@@ -96,9 +97,7 @@ class Connection
         return $stmt;
     }
 
-   
-
-    // fetchOne()
+    
     public function fetchOne(string $sql, array $params = []): ?array
     {
         $stmt = $this->query($sql, $params);
@@ -106,17 +105,17 @@ class Connection
         return $result ?: null;
     }
 
-    // 6. insert()
+  
     public function insert(string $table, array $data): int
     {
         $columns = implode(', ', array_keys($data));
         $placeholders = ':' . implode(', :', array_keys($data));
         $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
-        $stmt = $this->query($sql, $data);
+        //$stmt = $this->query($sql, $data);
         return (int) $this->pdo->lastInsertId();
     }
 
-    // update()
+    
     public function update(string $table, array $data, string $where): int
     {
         $set = [];
@@ -129,13 +128,51 @@ class Connection
         return $stmt->rowCount();
     }
 
-    // delete()
+  
     public function delete(string $table, string $where): int
     {
         $sql = "DELETE FROM {$table} WHERE {$where}";
         $stmt = $this->query($sql);
         return $stmt->rowCount();
     }
+
+
+    /**
+     * Escape value (PDO uses prepared statements, but this is for compatibility)
+     */
+    public static function escape($value)
+    {
+        self::checkConnection();
+        return substr(self::$pdo->quote($value), 1, -1);
+    }
+
+    /**
+     * Begin transaction
+     */
+    public static function beginTransaction()
+    {
+        self::checkConnection();
+        return self::$pdo->beginTransaction();
+    }
+
+    /**
+     * Commit transaction
+     */
+    public static function commit()
+    {
+        self::checkConnection();
+        return self::$pdo->commit();
+    }
+
+    /**
+     * Rollback transaction
+     */
+    public static function rollBack()
+    {
+        self::checkConnection();
+        return self::$pdo->rollBack();
+    }
+
 
 
     public function __destruct()

@@ -21,6 +21,8 @@ use function ini_set;
 use function is_array;
 use function is_bool;
 use function is_float;
+use function is_infinite;
+use function is_nan;
 use function is_object;
 use function is_resource;
 use function is_string;
@@ -31,6 +33,7 @@ use function spl_object_id;
 use function sprintf;
 use function str_repeat;
 use function str_replace;
+use function strpbrk;
 use function strtr;
 use function var_export;
 use BackedEnum;
@@ -92,7 +95,7 @@ final readonly class Exporter
             $maxLengthForStrings = $this->maxLengthForStrings;
         }
 
-        if (!$processed) {
+        if ($processed === null) {
             $processed = new RecursionContext;
         }
 
@@ -197,7 +200,7 @@ final readonly class Exporter
             // private   $propertyName => "\0ClassName\0propertyName"
             // protected $propertyName => "\0*\0propertyName"
             // public    $propertyName => "propertyName"
-            if (preg_match('/\0.+\0(.+)/', (string) $key, $matches)) {
+            if (preg_match('/\0.+\0(.+)/', (string) $key, $matches) === 1) {
                 $key = $matches[1];
             }
 
@@ -236,10 +239,10 @@ final readonly class Exporter
 
         if (!$value instanceof stdClass) {
             // using ReflectionClass prevents initialization of potential lazy objects
-            return count((new ReflectionClass($value))->getProperties());
+            return count(new ReflectionClass($value)->getProperties());
         }
 
-        return count((new ReflectionObject($value))->getProperties());
+        return count(new ReflectionObject($value)->getProperties());
     }
 
     /**
@@ -262,7 +265,7 @@ final readonly class Exporter
             }
 
             if (is_array($value)) {
-                assert(is_array($data[$key]) || is_object($data[$key]));
+                assert(isset($data[$key]) && (is_array($data[$key]) || is_object($data[$key])));
 
                 if ($processed->contains($data[$key]) !== false) {
                     $result[] = '*RECURSION*';
@@ -302,6 +305,7 @@ final readonly class Exporter
         if (is_resource($value)) {
             return sprintf(
                 'resource(%d) of type (%s)',
+                /** @phpstan-ignore cast.useless */
                 (int) $value,
                 get_resource_type($value),
             );
@@ -330,7 +334,7 @@ final readonly class Exporter
             return $this->exportString($value);
         }
 
-        if (!$processed) {
+        if ($processed === null) {
             $processed = new RecursionContext;
         }
 
@@ -347,15 +351,24 @@ final readonly class Exporter
 
     private function exportFloat(float $value): string
     {
+        if (is_nan($value)) {
+            return 'NAN';
+        }
+
+        if (is_infinite($value)) {
+            return $value > 0 ? 'INF' : '-INF';
+        }
+
         $precisionBackup = ini_get('precision');
 
         ini_set('precision', '-1');
 
-        $valueAsString = @(string) $value;
+        $valueAsString = (string) $value;
 
         ini_set('precision', $precisionBackup);
 
-        if ((string) @(int) $value === $valueAsString) {
+        // Add '.0' only if decimals and scientific notation are absent.
+        if (strpbrk($valueAsString, '.E') === false) {
             return $valueAsString . '.0';
         }
 
@@ -365,7 +378,7 @@ final readonly class Exporter
     private function exportString(string $value): string
     {
         // Match for most non-printable chars somewhat taking multibyte chars into account
-        if (preg_match('/[^\x09-\x0d\x1b\x20-\xff]/', $value)) {
+        if (preg_match('/[^\x09-\x0d\x1b\x20-\xff]/', $value) === 1) {
             return 'Binary String: 0x' . bin2hex($value);
         }
 

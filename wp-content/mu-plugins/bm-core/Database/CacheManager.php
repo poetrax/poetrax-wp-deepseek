@@ -1,5 +1,5 @@
 <?php
-namespace BM\Core\Cache;
+namespace BM\Core\Database;
 
 use BM\Core\Database\Connection;
 

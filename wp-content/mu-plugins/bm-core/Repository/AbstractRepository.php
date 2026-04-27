@@ -1,7 +1,7 @@
 <?php
 namespace BM\Core\Repository;
 use BM\Core\Database\Connection;
-use BM\Core\Cache\CacheManager;
+use BM\Core\Database\CacheManager;
 use BM\Core\Database\Cache;
 
 abstract class AbstractRepository
@@ -12,7 +12,7 @@ abstract class AbstractRepository
 
     public function __construct()
     {
-       $this->connection = Connection::getInstance();
+        $this->connection = Connection::getInstance();
         $cache = Cache::getInstance();
         $this->cacheManager = new CacheManager($cache, $this->connection);
     }
@@ -58,6 +58,7 @@ abstract class AbstractRepository
         $table = $this->getTableName();
         $where = "id = {$id}";
         return $this->connection->delete($table, $where);
+
     }
 
     /**
@@ -83,6 +84,11 @@ abstract class AbstractRepository
         $result = $this->connection->fetchOne($sql, $params);
         return $result ?: null;
     }
+
+
+     
+
+
 
 }
 

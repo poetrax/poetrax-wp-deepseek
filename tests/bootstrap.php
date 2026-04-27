@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // tests/bootstrap.php
 
 // Автозагрузка Composer

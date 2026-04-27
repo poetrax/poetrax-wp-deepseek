@@ -7,12 +7,12 @@ class BalanceRepository extends AbstractRepository
 {
     protected function getTableName(): string
     {
-        return 'user_balances';
+        return 'user_balance';
     }
     
     public function getBalance(int $userId): int
     {
-        $sql = "SELECT credits FROM {$this->table} WHERE user_id = :user_id";
+        $sql = "SELECT credits FROM {$this->getTableName()} WHERE user_id = :user_id";
         $result = $this->connection->fetchOne($sql, ['user_id' => $userId]);
         return $result ? (int)$result->credits : 0;
     }
@@ -26,7 +26,7 @@ class BalanceRepository extends AbstractRepository
             $newBalance = $current + $amount;
             
             // Обновляем баланс
-            $sql = "INSERT INTO {$this->table} (user_id, credits, lifetime_earned)
+            $sql = "INSERT INTO {$this->getTableName()} (user_id, credits, lifetime_earned)
                     VALUES (:user_id, :credits, :amount)
                     ON CONFLICT (user_id) DO UPDATE
                     SET credits = :credits,
@@ -63,7 +63,7 @@ class BalanceRepository extends AbstractRepository
         try {
             $newBalance = $current - $amount;
             
-            $sql = "UPDATE {$this->table} 
+            $sql = "UPDATE {$this->getTableName()} 
                     SET credits = :credits,
                         lifetime_spent = lifetime_spent + :amount,
                         updated_at = NOW()
