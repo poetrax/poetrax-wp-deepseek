@@ -27,20 +27,38 @@ class PoemRepository implements RepositoryInterface
         return 1; // или просто void
     }
 
+    // Добавьте эти методы:
+    public function create(array $data)
+    {
+        // Если интерфейс не требует типа возврата
+        return $this->connection->insert($this->getTableName(), $data);
+    }
+
+    public function find($id)
+    {
+        return $this->connection->fetchOne(
+            "SELECT * FROM {$this->getTableName()} WHERE id = ?",
+            [$id]
+        );
+    }
+
     public function delete($id)
     {
+        //TODO
         // реализация
         return 1;
     }
 
     public function findAll($limit = 100, $offset = 0)
     {
+        //TODO
         // реализация с учётом $limit и $offset
         return [];
     }
 
     public function count(array $conditions = [])
     {
+        //TODO
         return 0;
     }
 
@@ -51,11 +69,13 @@ class PoemRepository implements RepositoryInterface
 
     public function findBy(array $conditions, $limit = null, $orderBy = null)
     {
+        //TODO
         return [];
     }
 
     public function findOneBy(array $conditions)
     {
+        //TODO
         return null;
     }
 }

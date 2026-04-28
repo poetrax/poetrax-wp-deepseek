@@ -26,6 +26,9 @@ wp-config-local.php
 .env
 .env.local
 .env.*.local
+config/local.php
+/secrets/
+*.secret
 
 # IDE
 .vs/
@@ -50,7 +53,6 @@ desktop.ini
 # Локальные бэкапы БД
 *.sql
 *.sql.gz
-*.bak
 
 # Node (если вдруг)
 node_modules/

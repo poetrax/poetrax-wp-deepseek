@@ -32,8 +32,6 @@ class BM_TE_Installer {
     // Проверка наличия таблиц
  
     private static function check_tables() {
-        global $wpdb;
-        
         $required_tables = [
             BM_TE_TABLE_TRACK,
             BM_TE_TABLE_POEM,

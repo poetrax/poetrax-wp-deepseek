@@ -1,0 +1,139 @@
+
+     Замена wpdb
+     use BM\Core\Database\Connection;
+
+// Получаем соединение PDO
+$pdo = Connection::getInstance()->getPdo(); // или просто Connection::getInstance()
+
+// Базовый SQL
+$sql = "SELECT p.*, pt.short_name as poet_name 
+        FROM " . TableMapper::getInstance()->get('poem') . " p
+        LEFT JOIN " . TableMapper::getInstance()->get('poet') . " pt ON p.poet_id = pt.id
+        WHERE p.name LIKE :search";
+
+// Параметры
+$params = [':search' => '%' . $query . '%'];
+
+if ($poet_id) {
+    $sql .= " AND p.poet_id = :poet_id";
+    $params[':poet_id'] = $poet_id;
+}
+
+// Выполнение
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$results = $stmt->fetchAll(PDO::FETCH_OBJ); // или FETCH_ASSOC
+Полный пример с обработкой ошибок:
+php
+use BM\Core\Database\Connection;
+
+class PoemRepository {
+    private $pdo;
+    private $tableMapper;
+    
+    public function __construct() {
+        $this->pdo = Connection::getInstance();
+        $this->tableMapper = TableMapper::getInstance();
+    }
+    
+    public function searchPoems($query, $poet_id = null) {
+        try {
+            // Базовый SQL с именованными плейсхолдерами
+            $sql = "SELECT p.*, pt.short_name as poet_name 
+                    FROM " . $this->tableMapper->get('poem') . " p
+                    LEFT JOIN " . $this->tableMapper->get('poet') . " pt ON p.poet_id = pt.id
+                    WHERE p.name LIKE :search";
+            
+            $params = [':search' => '%' . $query . '%'];
+            
+            if ($poet_id) {
+                $sql .= " AND p.poet_id = :poet_id";
+                $params[':poet_id'] = $poet_id;
+            }
+            
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+            
+            return $stmt->fetchAll(\PDO::FETCH_OBJ);
+            
+        } catch (\PDOException $e) {
+            error_log('Database error: ' . $e->getMessage());
+            return [];
+        }
+    }
+}
+Сравнение с $wpdb:
+$wpdb	PDO
+$wpdb->prepare($sql, $params)	$pdo->prepare($sql) + execute($params)
+%s, %d	:named или ?
+$wpdb->get_results($sql)	$stmt->fetchAll()
+$wpdb->esc_like()	Дополнительная обработка
+Экранирование LIKE в PDO:
+В PDO нет встроенного esc_like(), нужно сделать свой:
+
+php
+
+ // Экранирование для LIKE в PDO
+ 
+function escapeLike($string) {
+    $search = ['\\', '%', '_'];
+    $replace = ['\\\\', '\%', '\_'];
+    return str_replace($search, $replace, $string);
+}
+
+// Использование:
+$sql = "WHERE p.name LIKE :search";
+$params[':search'] = '%' . escapeLike($query) . '%';
+Полный рабочий метод:
+php
+
+// Поиск стихов по названию
+
+public function searchPoems($query, $poet_id = null) {
+    $pdo = Connection::getInstance();
+    $tableMapper = TableMapper::getInstance();
+    
+    // Экранируем для LIKE
+    $escapedQuery = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $query) . '%';
+    
+    // Строим запрос
+    $sql = "SELECT p.*, pt.short_name as poet_name 
+            FROM " . $tableMapper->get('poem') . " p
+            LEFT JOIN " . $tableMapper->get('poet') . " pt ON p.poet_id = pt.id
+            WHERE p.name LIKE :query";
+    
+    $params = [':query' => $escapedQuery];
+    
+    if ($poet_id) {
+        $sql .= " AND p.poet_id = :poet_id";
+        $params[':poet_id'] = $poet_id;
+    }
+    
+    // Выполняем
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    
+    return $stmt->fetchAll(PDO::FETCH_OBJ);
+}
+Использование с позиционными плейсхолдерами (если не нравятся именованные):
+php
+// С ? вместо :named
+$sql = "SELECT p.*, pt.short_name as poet_name 
+        FROM " . $tableMapper->get('poem') . " p
+        LEFT JOIN " . $tableMapper->get('poet') . " pt ON p.poet_id = pt.id
+        WHERE p.name LIKE ?";
+
+$params = ['%' . $query . '%'];
+
+if ($poet_id) {
+    $sql .= " AND p.poet_id = ?";
+    $params[] = $poet_id;
+}
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+$results = $stmt->fetchAll(PDO::FETCH_OBJ);
+Важное отличие:
+⚠️ Безопасность: В $wpdb->prepare() плейсхолдеры работают автоматом. В PDO нужно экранировать LIKE вручную, как показано выше.
+
+Рекомендую использовать именованные плейсхолдеры (:name) — код читается легче, особенно когда много параметров.

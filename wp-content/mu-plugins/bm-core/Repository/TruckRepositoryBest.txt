@@ -1,0 +1,81 @@
+Вариант 3: Создать синглтон (лучшая практика)
+php
+class TrackRepository {
+    private static $instance = null;
+    private $connection;
+    
+    private function __construct() {
+        $this->connection = Connection::getInstance();
+    }
+    
+    public static function getInstance() {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+    
+    private function getConnection() {
+        return $this->connection;
+    }
+    
+    // Убираем static
+    public function bm_save_track() {
+        self::verify_nonce();
+        
+        $data = $_POST;
+        $track_id = isset($data['track_id']) ? intval($data['track_id']) : 0;
+        
+        $track_data = [
+            'track_name' => sanitize_text_field($data['track_name'] ?? ''),
+            'poet_id' => intval($data['poet_id'] ?? 0),
+            'poem_id' => intval($data['poem_id'] ?? 0),
+            'mood_id' => intval($data['mood_id'] ?? 0),
+            'theme_id' => intval($data['theme_id'] ?? 0),
+            'genre_id' => intval($data['genre_id'] ?? 0),
+            'track_duration' => intval($data['track_duration'] ?? 0),
+            'track_file_path' => esc_url_raw($data['track_file_path'] ?? ''),
+            'updated_at' => current_time('mysql'),
+        ];
+        
+        if ($track_id) {
+            $result = $this->getConnection()->update('track', $track_data, ['id' => $track_id]);
+            $message = 'Трек обновлен';
+        } else {
+            $track_data['created_at'] = current_time('mysql');
+            $track_data['user_id'] = get_current_user_id();
+            $track_id = $this->getConnection()->insert('track', $track_data);
+            $message = 'Трек создан';
+        }
+        
+        if ($track_id) {
+            wp_send_json_success([
+                'id' => $track_id,
+                'message' => $message
+            ]);
+        } else {
+            wp_send_json_error(['message' => 'Ошибка сохранения']);
+        }
+    }
+}
+
+// Использование (просто и элегантно):
+TrackRepository::getInstance()->bm_save_track();
+
+Для WordPress AJAX (правильная регистрация):
+php
+// Вместо static метода, регистрируем экземпляр
+class TrackRepository {
+    public function __construct() {
+        // Регистрируем AJAX хуки
+        add_action('wp_ajax_save_track', [$this, 'bm_save_track']);
+        add_action('wp_ajax_nopriv_save_track', [$this, 'bm_save_track']);
+    }
+    
+    public function bm_save_track() {
+        // Ваш код без static
+    }
+}
+
+// Инициализация
+new TrackRepository();

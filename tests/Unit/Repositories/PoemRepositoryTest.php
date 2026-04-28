@@ -1,8 +1,8 @@
-﻿<?php
+<?php
 namespace Tests\Unit\Repositories;
 
 use PHPUnit\Framework\TestCase;
-use BM\Repositories\PoemRepository;
+use BM\Core\Repository\PoemRepository;
 
 class PoemRepositoryTest extends TestCase
 {

@@ -2,8 +2,7 @@
     "name": "poetrax/wordpress-core",
     "description": "Poetrax WordPress with BM Core",
     "type": "project",
-    "require": {},
-    "require-dev": {
-        "phpunit/phpunit": "^13.0"
+    "require": {
+        "vlucas/phpdotenv": "^5.4"
     }
 }

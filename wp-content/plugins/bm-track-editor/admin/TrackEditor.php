@@ -6,7 +6,7 @@ use BM\Services\PlayerService;
 use BM\Repositories\TrackRepository;
 use BM\Repositories\PoetRepository;
 use BM\Repositories\PoemRepository;
-use BM\Core\Config\TableMapper;
+use BM\Core\Database\TableMapper;
 
 class TrackEditor {
     
@@ -96,7 +96,7 @@ class TrackEditor {
      * Получение всех справочников
      */
     private function getMasterData() {
-        global $wpdb;
+      
         
         return [
             'poets' => $this->poet_repo->getAll(),
@@ -216,7 +216,7 @@ class TrackEditor {
         }
         
         // Получаем музыкальные детали
-        global $wpdb;
+      
         $music_details = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM " . TableMapper::getInstance()->get('track_music_detail') . " WHERE track_id = %d",
             $track_id
@@ -232,7 +232,7 @@ class TrackEditor {
      * Сохранение музыкальных деталей
      */
     private function saveMusicDetails($track_id, $details) {
-        global $wpdb;
+      
         
         $details['track_id'] = $track_id;
         

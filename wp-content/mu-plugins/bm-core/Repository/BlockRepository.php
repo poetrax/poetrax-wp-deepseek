@@ -109,7 +109,6 @@ class BlockRepository extends AbstractRepository
      */
     public function delete(int $blockId, int $userId): bool
     {
-        $sql = "DELETE FROM {$this->getTableName()} WHERE id = ? AND blocker_user_id = ?";
         $result = $this->connection->delete($this->getTableName(), "id = $blockId AND blocker_user_id = $userId");
         return $result > 0;
     }
@@ -130,7 +129,6 @@ class BlockRepository extends AbstractRepository
      */
     public function cleanExpired(): int
     {
-        $sql = "DELETE FROM {$this->getTableName()} WHERE expires_at IS NOT NULL AND expires_at < NOW()";
         return $this->connection->delete($this->getTableName(), "expires_at IS NOT NULL AND expires_at < NOW()");
     }
 }

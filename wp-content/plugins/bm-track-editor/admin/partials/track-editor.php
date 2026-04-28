@@ -15,7 +15,7 @@ $track = null;
 $details = null;
 
 if ($track_id) {
-    global $wpdb;
+  
     $track = $wpdb->get_row($wpdb->prepare(
         "SELECT * FROM " . BM_TE_TABLE_TRACK . " WHERE id = %d",
         $track_id

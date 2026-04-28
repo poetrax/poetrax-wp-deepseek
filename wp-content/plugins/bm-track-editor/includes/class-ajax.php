@@ -1,5 +1,5 @@
 <?php
-use BM\Database\Connection;
+use BM\Core\Database\Connection;
 use BM\Core\Database\TableMapper;
 
 /**
@@ -7,6 +7,12 @@ use BM\Core\Database\TableMapper;
  */
 class BM_TE_Ajax {
 
+   protected function getConnection()
+   {
+        $connection=Connection::getInstance();
+        return $connection;
+   }
+    
     public static function init() {
         $actions = [
             'bm_save_track',
@@ -27,7 +33,7 @@ class BM_TE_Ajax {
     /**
      * Сохранение трека
      */
-    public static function bm_save_track() {
+    public function bm_save_track() {
         self::verify_nonce();
         
         $data = $_POST;
@@ -48,13 +54,13 @@ class BM_TE_Ajax {
         
         if ($track_id) {
             // Обновление
-            $result = Connection::update('track', $track_data, ['id' => $track_id]);
+            $result = $this->getConnection()->update('track', $track_data, ['id' => $track_id]);
             $message = 'Трек обновлен';
         } else {
             // Создание
             $track_data['created_at'] = current_time('mysql');
             $track_data['user_id'] = get_current_user_id();
-            $track_id = Connection::insert('track', $track_data);
+            $track_id = $this->getConnection()->insert('track', $track_data);
             $message = 'Трек создан';
         }
         
@@ -71,7 +77,7 @@ class BM_TE_Ajax {
     /**
      * Получение данных трека
      */
-    public static function bm_get_track() {
+    public function bm_get_track() {
         self::verify_nonce();
         
         $track_id = intval($_POST['track_id'] ?? 0);
@@ -80,14 +86,14 @@ class BM_TE_Ajax {
             wp_send_json_error(['message' => 'ID трека не указан']);
         }
         
-        $track = Connection::row(
+        $track = $this->getConnection()->row(
             "SELECT * FROM " . TableMapper::getInstance()->get('track') . " WHERE id = %d",
             [$track_id]
         );
         
         if ($track) {
             // Получаем музыкальные детали
-            $details = Connection::row(
+            $details = $this->getConnection()->row(
                 "SELECT * FROM " . TableMapper::getInstance()->get('music_detail') . " WHERE track_id = %d",
                 [$track_id]
             );
@@ -104,7 +110,7 @@ class BM_TE_Ajax {
     /**
      * Удаление трека
      */
-    public static function bm_delete_track() {
+    public function bm_delete_track() {
         self::verify_nonce();
         
         $track_id = intval($_POST['track_id'] ?? 0);
@@ -114,10 +120,10 @@ class BM_TE_Ajax {
         }
         
         // Удаляем музыкальные детали
-        Connection::delete('music_detail', ['track_id' => $track_id]);
+        $this->getConnection()->delete('music_detail', ['track_id' => $track_id]);
         
         // Удаляем трек
-        $result = Connection::delete('track', ['id' => $track_id]);
+        $result = $this->getConnection()->delete('track', ['id' => $track_id]);
         
         if ($result) {
             wp_send_json_success(['message' => 'Трек удален']);
@@ -162,42 +168,51 @@ class BM_TE_Ajax {
     /**
      * Поиск стихов
      */
-    public static function bm_search_poems() {
+    public function bm_search_poems()
+    {
         self::verify_nonce();
-        
+
         $query = sanitize_text_field($_POST['query'] ?? '');
         $poet_id = intval($_POST['poet_id'] ?? 0);
-        
+
         if (strlen($query) < 3) {
             wp_send_json_error(['message' => 'Слишком короткий запрос']);
         }
-        
-        $sql = "SELECT p.*, pt.short_name as poet_name 
+
+        try {
+            $escaped_query = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $query) . '%';
+
+            $sql = "SELECT p.*, pt.short_name as poet_name 
                 FROM " . TableMapper::getInstance()->get('poem') . " p
                 LEFT JOIN " . TableMapper::getInstance()->get('poet') . " pt ON p.poet_id = pt.id
-                WHERE p.name LIKE %s";
-        
-        $params = ['%' . $wpdb->esc_like($query) . '%'];
-        
-        if ($poet_id) {
-            $sql .= " AND p.poet_id = %d";
-            $params[] = $poet_id;
+                WHERE p.name LIKE :query";
+
+            $params = [':query' => $escaped_query];
+
+            if ($poet_id) {
+                $sql .= " AND p.poet_id = :poet_id";
+                $params[':poet_id'] = $poet_id;
+            }
+
+            $sql .= " LIMIT 20";
+
+            $poems = Connection::select($sql, $params);
+
+            wp_send_json_success($poems);
+
+        } catch (PDOException $e) {
+            error_log('Search poems error: ' . $e->getMessage());
+            wp_send_json_error(['message' => 'Ошибка поиска']);
         }
-        
-        $sql .= " LIMIT 20";
-        
-        $poems = Connection::query($sql, $params);
-        
-        wp_send_json_success($poems);
     }
     
     /**
      * Получение списка поэтов
      */
-    public static function bm_get_poets() {
+    public function bm_get_poets() {
         self::verify_nonce();
         
-        $poets = Connection::query(
+        $poets = $this->getConnection()->query(
             "SELECT id, short_name, last_name, first_name 
              FROM " . TableMapper::getInstance()->get('poet') . " 
              WHERE is_active = 1 
@@ -210,25 +225,27 @@ class BM_TE_Ajax {
     /**
      * Получение статистики
      */
-    public static function bm_get_stats() {
+    public function bm_get_stats()
+    {
         self::verify_nonce();
-        
-        global $wpdb;
-        
+
+        $mapper = TableMapper::getInstance();
+        $conn = $this->getConnection();
+
         $stats = [
-            'total_tracks' => Connection::var("SELECT COUNT(*) FROM " . TableMapper::getInstance()->get('track')),
-            'total_poems' => Connection::var("SELECT COUNT(*) FROM " . TableMapper::getInstance()->get('poem')),
-            'total_poets' => Connection::var("SELECT COUNT(*) FROM " . TableMapper::getInstance()->get('poet')),
-            'total_plays' => Connection::var("SELECT COUNT(*) FROM " . TableMapper::getInstance()->get('interaction') . " WHERE type = 'play'"),
-            'recent_tracks' => Connection::query(
+            'total_tracks' => $conn->var("SELECT COUNT(*) FROM " . $mapper->get('track')),
+            'total_poems' => $conn->var("SELECT COUNT(*) FROM " . $mapper->get('poem')),
+            'total_poets' => $conn->var("SELECT COUNT(*) FROM " . $mapper->get('poet')),
+            'total_plays' => $conn->var("SELECT COUNT(*) FROM " . $mapper->get('interaction') . " WHERE type = 'play'"),
+            'recent_tracks' => $conn->select(
                 "SELECT t.*, p.short_name as poet_name 
-                 FROM " . TableMapper::getInstance()->get('track') . " t
-                 LEFT JOIN " . TableMapper::getInstance()->get('poet') . " p ON t.poet_id = p.id
-                 ORDER BY t.created_at DESC
-                 LIMIT 5"
+             FROM " . $mapper->get('track') . " t
+             LEFT JOIN " . $mapper->get('poet') . " p ON t.poet_id = p.id
+             ORDER BY t.created_at DESC
+             LIMIT 5"
             )
         ];
-        
+
         wp_send_json_success($stats);
     }
     

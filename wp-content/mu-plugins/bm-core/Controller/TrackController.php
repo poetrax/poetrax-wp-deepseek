@@ -143,7 +143,7 @@ class TrackController extends BaseController
         $limit = (int) ($this->getParam('limit', 10));
         $period = $this->getParam('period', 'week');
         
-        $tracks = $this->trackService->trackRepo->getPopular($limit);
+        $tracks = $this->trackService->getTrackRepo()->getPopular($limit);
         
         return $this->jsonSuccess($tracks);
     }
@@ -155,7 +155,7 @@ class TrackController extends BaseController
     {
         $limit = (int) ($this->getParam('limit', 10));
         
-        $tracks = $this->trackService->trackRepo->getRecent($limit);
+        $tracks = $this->trackService->getTrackRepo(trackRepo)->getRecent($limit);
         
         return $this->jsonSuccess($tracks);
     }

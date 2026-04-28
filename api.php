@@ -1,6 +1,14 @@
 <?php
 namespace BM\Core;
+
 use PDO;
+use BM\Core\Controller\TrackController;
+use BM\Core\Controller\FilterController;
+use BM\Core\Controller\RecommendationController;
+use BM\Core\Database\Connection;
+use BM\Core\Database\Cache;
+use BM\Core\Database\Loader;
+use BM\Core\Config;
 
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/wp-content/mu-plugins/bm-core-loader.php';
@@ -27,10 +35,6 @@ $dbConfig = [
     'password' => $_ENV['DB_PASSWORD'],
 ];
 
-use BM\Core\Database\Connection;
-use BM\Core\Database\Cache;
-use BM\Core\Database\Loader;
-use BM\Core\Config;
 
 $connection = Connection::getInstance($dbConfig);
 $cache = Cache::getInstance();
@@ -249,3 +253,5 @@ $router->get('/api/recommendations/new', [RecommendationController::class, 'newR
 $router->get('/api/recommendations/trending', [RecommendationController::class, 'trending']);
 $router->get('/api/recommendations/poet/{id}', [RecommendationController::class, 'forPoet']);
 $router->get('/api/recommendations/poem/{id}', [RecommendationController::class, 'forPoem']);
+
+

@@ -126,7 +126,7 @@ function bm_get_poem_data() {
     $poem_id = intval($_POST['poem_id']);
     
     if ($track_id && !$poem_id) {
-        global $wpdb;
+   
         $track = $wpdb->get_row($wpdb->prepare(
             "SELECT poem_id, poet_id FROM " . BM_TE_TABLE_TRACK . " WHERE id = %d",
             $track_id
@@ -138,7 +138,7 @@ function bm_get_poem_data() {
         wp_send_json_error(['message' => 'Стихотворение не найдено']);
     }
     
-    $poem_repo = new BM\Repositories\PoemRepository();
+    $poem_repo = new BM\Core\Repository\PoemRepository();
     $poem = $poem_repo->find($poem_id);
     
     if (!$poem) {
@@ -147,7 +147,7 @@ function bm_get_poem_data() {
     
     $poet_name = '';
     if ($poem->poet_id) {
-        $poet_repo = new BM\Repositories\PoetRepository();
+        $poet_repo = new BM\Core\Repository\PoemRepository();
         $poet = $poet_repo->find($poem->poet_id);
         $poet_name = $poet ? $poet->short_name : '';
     }
@@ -170,7 +170,7 @@ function get_poet_tracks_callback() {
         ob_end_clean();
     }
 
-    global $wpdb;
+
     
     error_log('AJAX запрос get_poet_tracks получен');
     error_log('POST данные: ' . print_r($_POST, true));

@@ -1189,7 +1189,7 @@ function get_audio_tracks_from_db($limit, $type) {
 
 //TODO here is probem with AND t.performance_type = 'song' not only song ";  AND user_id =$current_user_id
 function get_audio_tracks_from_db_wp($limit, $type) {
-    global $wpdb;
+   
     $current_user_id = get_current_user_id();
 
     //HACK
@@ -1585,7 +1585,7 @@ function get_poet_tracks_callback() {
         ob_end_clean();
     }
 
-    global $wpdb;
+   
     
     // Логирование для отладки
     error_log('AJAX запрос get_poet_tracks получен');
@@ -1942,7 +1942,7 @@ function bm_get_poem_data() {
     
     // Пробуем получить через трек
     if ($track_id && !$poem_id) {
-        global $wpdb;
+
         $track = $wpdb->get_row($wpdb->prepare(
             "SELECT poem_id, poet_id FROM " . BM_TE_TABLE_TRACK . " WHERE id = %d",
             $track_id

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 class TrackRewriteRules {
     
     public function __construct() {
@@ -110,7 +110,7 @@ class TrackRewriteRules {
      * Проверка существования трека
      */
     private function check_track_exists($track_id) {
-        global $wpdb;
+      
         
         $table_name = 'bm_ctbl000_track';
         
@@ -134,7 +134,7 @@ class TrackRewriteRules {
             return $cached;
         }
         
-        global $wpdb;
+       
         $table_name = 'bm_ctbl000_track';
         
         $track = $wpdb->get_row($wpdb->prepare(
@@ -327,7 +327,7 @@ class TrackRewriteRules {
      */
     private function get_track_terms($track_id, $taxonomy) {
         // Если используете кастомную таблицу
-        global $wpdb;
+   
         
         $table_name = 'bm_ctbl000_track_' . $taxonomy . 's';
         $term_table = 'bm_ctbl000_' . $taxonomy . 's';

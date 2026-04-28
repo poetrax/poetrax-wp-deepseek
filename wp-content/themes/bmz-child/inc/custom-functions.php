@@ -6,7 +6,7 @@
 //use BM\Cache\PropertiesCacheManager;
 //use BM\Cache\AjaxPropertiesHandler;
 //use BM\Cache\CacheInterface;
-use BM\Database\Connection;
+use BM\Core\Database\Connection;
 
 
 /**
@@ -43,12 +43,14 @@ if (is_user_logged_in()) {
     }
 }
 
+//HACK
 $config = [
     'host' => 'poetrax_deepseek_mysql',
     'database' => 'u3436142_poetrax_deepseek_db',
     'username' => 'u3436142_poetrax_deepseek_user',
     'password' => 'CI57bdR7m6F9Xem7',
 ];
+
 
 
 /**
@@ -260,7 +262,6 @@ function get_audio_tracks_from_db($limit, $type) {
     $current_user_id = get_current_user_id();
     $current_user_id = 1; // HACK
     
-    global $pdo;
     $query = "
         SELECT 
         t.id as track_id,
@@ -309,12 +310,12 @@ function get_audio_tracks_from_db($limit, $type) {
         $query .= " LIMIT {$limit}";
     }
     
-    $results = Connection::query($query, [$current_user_id]);
+    $results = Connection::queryStatic($query, [$current_user_id]);
     return $results;
 }
 
 function get_audio_tracks_from_db_wp($limit, $type) {
-    global $wpdb;
+ 
     $current_user_id = get_current_user_id();
     $current_user_id = 1; // HACK
     

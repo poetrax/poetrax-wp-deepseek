@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 add_action('rest_api_init', function() {
     register_rest_route('bestmz/v1', '/track/(?P<id>\d+)', [
         'methods' => 'GET',
@@ -106,7 +106,7 @@ function track_view_api(WP_REST_Request $request) {
     $referrer = $request->get_param('referrer') ?: $_SERVER['HTTP_REFERER'] ?? '';
     
     // Логируем просмотр
-    global $wpdb;
+  
     $table = 'bm_ctbl000_interaction';
     $wpdb->insert($table, [
         'track_id' => $track_id,

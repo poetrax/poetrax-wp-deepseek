@@ -96,7 +96,7 @@ class BM_TE_Admin {
         $offset = ($current_page - 1) * $tracks_per_page;
         
         // Получение треков
-        global $wpdb;
+    
         $tracks = $wpdb->get_results($wpdb->prepare(
             "SELECT t.*, p.short_name as poet_name 
             FROM " . BM_TE_TABLE_TRACK . " t
@@ -121,7 +121,7 @@ class BM_TE_Admin {
         $track_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         
         // Получение данных для выпадающих списков
-        global $wpdb;
+      
         
         $poets = $wpdb->get_results("SELECT id, short_name FROM " . BM_TE_TABLE_POET . " WHERE is_active = 1 ORDER BY last_name");
         
@@ -159,7 +159,7 @@ public static function render_poem_list() {
     $current_page = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
     $offset = ($current_page - 1) * $per_page;
     
-    global $wpdb;
+   
     $poems = $wpdb->get_results($wpdb->prepare(
         "SELECT p.*, pt.short_name as poet_name 
         FROM " . BM_TE_TABLE_POEM . " p
@@ -185,7 +185,7 @@ public static function render_poet_list() {
     $current_page = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
     $offset = ($current_page - 1) * $per_page;
     
-    global $wpdb;
+  
     $poets = $wpdb->get_results($wpdb->prepare(
         "SELECT * FROM " . BM_TE_TABLE_POET . " 
         WHERE is_active = 1 
@@ -307,7 +307,7 @@ public static function render_track_comments($track_id) {
      * Получение количества треков
      */
     public static function get_tracks_count() {
-        global $wpdb;
+   
         return $wpdb->get_var("SELECT COUNT(*) FROM " . BM_TE_TABLE_TRACK);
     }
     
@@ -315,7 +315,7 @@ public static function render_track_comments($track_id) {
      * Проверка наличия FULLTEXT индексов
      */
     public static function check_fulltext_index() {
-        global $wpdb;
+    
         $result = $wpdb->get_results("SHOW INDEX FROM " . BM_TE_TABLE_TRACK . " WHERE Index_type = 'FULLTEXT'");
         return !empty($result);
     }

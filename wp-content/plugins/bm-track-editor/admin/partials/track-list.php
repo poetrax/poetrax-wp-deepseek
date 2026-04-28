@@ -28,7 +28,7 @@
         <select id="bm-te-poet-filter">
             <option value=""><?php _e('Все поэты', 'bm-track-editor'); ?></option>
             <?php
-            global $wpdb;
+          
             $poets = $wpdb->get_results("SELECT id, short_name FROM " . BM_TE_TABLE_POET . " ORDER BY last_name");
             foreach ($poets as $poet):
             ?>

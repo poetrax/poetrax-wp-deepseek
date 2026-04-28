@@ -287,7 +287,4 @@ public function getFiltered(array $filters, int $page = 1, int $limit = 20): arr
             ];
         }, $page, $limit);
     }
-
-
-
 }
