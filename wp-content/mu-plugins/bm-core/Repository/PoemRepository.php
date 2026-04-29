@@ -18,7 +18,7 @@ class PoemRepository implements RepositoryInterface
 
     public function __construct()
     {
-        $this->cache = new Cache(); // создаём экземпляр
+        
     }
 
     public function update($id, array $data)

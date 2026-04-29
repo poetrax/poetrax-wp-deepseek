@@ -708,7 +708,7 @@ function ta_music_selector_code($type) {
         $table = $table_map[$type];
         $query = "SELECT id, name, suno_prompt FROM {$table} WHERE is_active = 1 ORDER BY name";
         
-        $items = Connection::query($query);
+        $items = this->connection->query($query);
        
         $name_group = $name_group_map[$type];
 
@@ -757,7 +757,7 @@ function handle_get_poems() {
 
       
         $properties = [];
-        $properties = Connection::query($query);
+        $properties = this->connection->query($query);
    
 
         // Используем только один метод вывода
@@ -1000,7 +1000,7 @@ function donate_shortcode() {
         ';
         $current_user_id = get_current_user_id();
      
-        $user = Connection::query($query,[$current_user_id])
+        $user = this->connection->query($query,[$current_user_id])
 
         $user_email = empty($user['user_email']) ? '' : $user['user_email'];
         $user_phone = empty($user['user_phone']) ? '' : $user['user_phone'];
@@ -1181,7 +1181,7 @@ function get_audio_tracks_from_db($limit, $type) {
      $time = strtotime('-1 month', time());
     //$time = date('d.m.Y H:i:s', $time); // 03.09.2025 07:50:07 
      
-    $results = Connection::query($query,[$current_user_id]);
+    $results = this->connection->query($query,[$current_user_id]);
     return $results;
 }
 
@@ -1260,7 +1260,7 @@ function get_audio_tracks_from_db_wp($limit, $type) {
         $query .=" LIMIT {$limit}";
     }
     $query .=";";
-    $results = $wpdb->get_results($query);
+    $results = $this->connection->get_results($query);
     //TO DO условие если нет резульата возвращает ''
     return $results;
 }
@@ -1620,8 +1620,8 @@ function get_poet_tracks_callback() {
     error_log("Используемые таблицы: {$track_table}, {$poem_table}");
     
     // Проверяем, существуют ли таблицы
-    $track_table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$track_table}'") === $track_table;
-    $poem_table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$poem_table}'") === $poem_table;
+    $track_table_exists = connection->get_var("SHOW TABLES LIKE '{$track_table}'") === $track_table;
+    $poem_table_exists = connection->get_var("SHOW TABLES LIKE '{$poem_table}'") === $poem_table;
     
     error_log("Таблица треков существует: " . ($track_table_exists ? 'да' : 'нет'));
     error_log("Таблица стихов существует: " . ($poem_table_exists ? 'да' : 'нет'));
@@ -1633,7 +1633,7 @@ function get_poet_tracks_callback() {
     
     // Пробуем разные варианты запроса
     if ($poet_id > 0) {
-        $query = $wpdb->prepare(
+        $query = 
             "SELECT SQL_CALC_FOUND_ROWS t.track_name, t.track_path, t.poem_slug 
              FROM {$track_table} t 
              WHERE t.poet_id = %d 
@@ -1641,10 +1641,9 @@ function get_poet_tracks_callback() {
              AND t.track_path != '' 
              ORDER BY t.track_name
              LIMIT %d OFFSET %d",
-            $poet_id, $per_page, $offset
-        );
+            $poet_id, $per_page, $offset;
     } else {
-         $query = $wpdb->prepare(
+         $query = 
             "SELECT SQL_CALC_FOUND_ROWS t.track_name, t.track_path, t.poem_slug 
              FROM {$track_table} t 
              WHERE t.poet_name = %s 
@@ -1653,16 +1652,16 @@ function get_poet_tracks_callback() {
              ORDER BY t.track_name
              LIMIT %d OFFSET %d",
             $poet_name, $per_page, $offset
-        );
+        ;
         
         error_log("Выполняем запрос: " . $query);
     }
     
-    $results = $wpdb->get_results($query);
+    $results = $this->connection->get_results($query);
     error_log("Найдено результатов: " . count($results));
     
-    if ($wpdb->last_error) {
-        error_log("Ошибка SQL: " . $wpdb->last_error);
+    if ($this->connection->last_error) {
+        error_log("Ошибка SQL: " . $this->connection->last_error);
         
         // Пробуем альтернативный запрос
         if (empty($poet_name)) {
@@ -1670,7 +1669,7 @@ function get_poet_tracks_callback() {
         }
         
         // Ищем poet_id по имени поэта
-        $poet_id_from_name = $wpdb->get_var($wpdb->prepare(
+        $poet_id_from_name = $this->connection->get_var($this->connection->prepare(
             "SELECT poet_id FROM {$poem_table} WHERE poet_name = %s LIMIT 1",
             $poet_name
         ));
@@ -1679,7 +1678,7 @@ function get_poet_tracks_callback() {
         error_log("Найден poet_id: " . $poet_id_from_name);
         
         if ($poet_id_from_name) {
-            $query = $wpdb->prepare(
+            $query = $this->connection->prepare(
                 "SELECT SQL_CALC_FOUND_ROWS 
                  t.track_name, 
                  t.track_path, 
@@ -1693,12 +1692,12 @@ function get_poet_tracks_callback() {
                 $poet_id_from_name, $per_page, $offset
             );
             
-            $results = $wpdb->get_results($query);
+            $results = $this->connection->get_results($query);
             error_log("Найдено результатов после поиска по poet_id: " . count($results));
         }
     }
     
-    $total_rows = $wpdb->get_var("SELECT FOUND_ROWS()");
+    $total_rows = $this->connection->get_var("SELECT FOUND_ROWS()");
     $total_pages = ceil($total_rows / $per_page);
     
     error_log("Всего строк: {$total_rows}, Всего страниц: {$total_pages}");
@@ -1943,7 +1942,7 @@ function bm_get_poem_data() {
     // Пробуем получить через трек
     if ($track_id && !$poem_id) {
 
-        $track = $wpdb->get_row($wpdb->prepare(
+        $track = $this->connection->get_row($this->connection->prepare(
             "SELECT poem_id, poet_id FROM " . BM_TE_TABLE_TRACK . " WHERE id = %d",
             $track_id
         ));

@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     
         try {
-            Connection::beginTransaction();
+            connection->beginTransaction();
         
             //Поиск или создание пользователя
             $user = findOrCreateUser($_POST);
@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             //Обработка предложений стилей/жанров
             processStyleGenreSuggestions($track_id, $user['id'], $_POST);
 
-            Connection::commit();
+            connection->commit();
         
             // Успешный ответ
             echo json_encode([
@@ -127,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
         
         } catch (\Exception $e) {
-            Connection::rollBack();
+            connection->rollBack();
             http_response_code(500);
             echo json_encode(['success' => false, 'error' => 'Ошибка при сохранении заказа: ' . $e->getMessage()]);
         }
@@ -376,7 +376,7 @@ function findOrCreateUser($data) {
         if (!empty($update_fields)) {
             $update_params[] = $user['id'];
             $query = "UPDATE bm_ctbl000_user SET " . implode(', ', $update_fields) . " WHERE id = ?";
-            Connection::query($query,[$update_params]);
+            $this->connection->query($query,[$update_params]);
         }
         
         return $user;

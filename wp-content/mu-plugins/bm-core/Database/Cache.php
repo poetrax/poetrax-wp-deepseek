@@ -19,8 +19,20 @@ class Cache
         return self::$instance;
     }
 
+    /**
+     * Преобразует ключ в строку (если передан массив)
+     */
+    private function normalizeKey($key): string
+    {
+        if (is_array($key)) {
+            return implode('_', $key);
+        }
+        return (string) $key;
+    }
+
     public function get(string $key): mixed
     {
+        $key = $this->normalizeKey($key);
         if (!$this->has($key))
             return null;
         if (isset($this->ttl[$key]) && $this->ttl[$key] < time()) {
@@ -29,9 +41,10 @@ class Cache
         }
         return $this->storage[$key];
     }
-
+ 
     public function set(string $key, mixed $value, ?int $ttlSeconds = null): void
     {
+        $key = $this->normalizeKey($key);
         $this->storage[$key] = $value;
         if ($ttlSeconds !== null) {
             $this->ttl[$key] = time() + $ttlSeconds;
@@ -40,6 +53,7 @@ class Cache
 
     public function has(string $key): bool
     {
+        $key = $this->normalizeKey($key);
         if (!isset($this->storage[$key]))
             return false;
         if (isset($this->ttl[$key]) && $this->ttl[$key] < time()) {
@@ -51,6 +65,7 @@ class Cache
 
     public function delete(string $key): void
     {
+        $key = $this->normalizeKey($key);
         unset($this->storage[$key], $this->ttl[$key]);
     }
 

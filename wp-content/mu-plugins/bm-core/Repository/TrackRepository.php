@@ -6,7 +6,7 @@ use BM\Core\Database\TableMapper;
 
 class TrackRepository extends AbstractRepository
 {
-    private const TABLE_NAME = 'track';  // ← реальное имя таблицы
+    private const TABLE_NAME = 'track';
  	private const FIELD_IS_APPROVED = 'is_approved';
     private const FIELD_IS_ACTIVE = 'is_active';
     private const FIELD_CREATED_AT = 'created_at';
@@ -20,8 +20,7 @@ class TrackRepository extends AbstractRepository
     {
         parent::__construct();
         $this->config = $config;
-        $this->queryBuilder = new QueryBuilder($this->connection);
-    }
+     }
 
 	protected function getTableName(): string
     {
@@ -35,7 +34,7 @@ class TrackRepository extends AbstractRepository
     {
         $limit = min($limit, self::MAX_LIMIT);
         
-        return $this->queryBuilder
+        return $this->queryBuilder($this->connection)
             ->reset()
             ->table($this->getTableName())
             ->where('poet_id', $poetId)

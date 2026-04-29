@@ -48,6 +48,12 @@ class QueryBuilder
         return $this;
     }
 
+    public static function tableStatic(string $tableName)
+    {
+        $table = $tableName;
+        return $table;
+    }
+
     /**
      * Указать поля для выборки
      */
@@ -315,8 +321,7 @@ class QueryBuilder
 
 /*
 // Пример с пагинацией
-$queryBuilder = new QueryBuilder($connection);
-$result = $queryBuilder
+$result = $this->querybuilder($this->connection)-
     ->TableMapper::getInstance()->get('track')
     ->where('is_approved', 1)
     ->where('is_active', 1)

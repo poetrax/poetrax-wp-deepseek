@@ -8,18 +8,16 @@ interface RepositoryInterface
 {
     public function find($id)
     {
-        $cache = new Cache();
         $cache_key = ['image', $id];
 
-        $image = $cache->get($cache_key);
+        $image = $this->cache->get($cache_key);
         if (!$image) {
-            $connection = Connection::getInstance();
-            $image = $connection->fetchOne(
+             $image = $this->connection->fetchOne(
                 "SELECT * FROM img WHERE id = ?",
                 [$id]
             );
             if ($image) {
-                $cache->set($cache_key, $image, 3600);
+                $this->cache->set($cache_key, $image, 3600);
             }
         }
         return $image;
@@ -32,22 +30,21 @@ interface RepositoryInterface
 
     public function findBy(array $conditions, $limit = null, $orderBy = null)
     {
-        $qb = new QueryBuilder(Connection::getInstance());
-        $qb->table('img');
+        $this->querybuilder($this->connection)->table('img');
 
         foreach ($conditions as $field => $value) {
-            $qb->where($field, $value);
+            $this->querybuilder($this->connection)->where($field, $value);
         }
 
         if ($orderBy) {
-            $qb->orderBy($orderBy);
+            $this->querybuilder($this->connection)->orderBy($orderBy);
         }
 
         if ($limit) {
-            $qb->limit($limit);
+            $this->querybuilder($this->connection)->limit($limit);
         }
 
-        return $qb->get();
+        return $this->querybuilder($this->connection)->get();
     }
 
     public function findOneBy(array $conditions)
@@ -58,14 +55,13 @@ interface RepositoryInterface
 
     public function count(array $conditions = [])
     {
-        $qb = new QueryBuilder(Connection::getInstance());
-        $qb->table('img')->select('COUNT(*) as total');
+        $this->querybuilder($this->connection)->table('img')->select('COUNT(*) as total');
 
         foreach ($conditions as $field => $value) {
-            $qb->where($field, $value);
+            $this->querybuilder($this->connection)->where($field, $value);
         }
 
-        $result = $qb->first();
+        $result = $this->querybuilder($this->connection)->first();
         return $result ? $result->total : 0;
     }
 

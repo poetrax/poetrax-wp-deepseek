@@ -16,16 +16,16 @@ $details = null;
 
 if ($track_id) {
   
-    $track = $wpdb->get_row($wpdb->prepare(
+    $track = $this->connection->get_row(
         "SELECT * FROM " . BM_TE_TABLE_TRACK . " WHERE id = %d",
         $track_id
-    ));
+    );
     
     if ($track) {
-        $details = $wpdb->get_row($wpdb->prepare(
+        $details = $this->connection->get_row(
             "SELECT * FROM " . BM_TE_TABLE_MUSIC_DETAIL . " WHERE track_id = %d",
             $track_id
-        ));
+        );
     }
 }
 ?>
@@ -96,10 +96,10 @@ if ($track_id) {
                     <?php endif; ?>
                     
                     <?php if (!empty($track->poem_id)): 
-                        $poem = $wpdb->get_row($wpdb->prepare(
+                        $poem = $this->connection->get_row(
                             "SELECT * FROM " . BM_TE_TABLE_POEM . " WHERE id = %d",
                             $track->poem_id
-                        ));
+                        );
                     ?>
                     <div class="bm-te-selected-poem">
                         <strong><?php echo esc_html($poem->name); ?></strong>

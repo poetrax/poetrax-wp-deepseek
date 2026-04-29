@@ -9,7 +9,7 @@ class BM_TE_Ajax {
 
    protected function getConnection()
    {
-        $connection=Connection::getInstance();
+        $connection=this->connection->getInstance();
         return $connection;
    }
     
@@ -196,7 +196,7 @@ class BM_TE_Ajax {
 
             $sql .= " LIMIT 20";
 
-            $poems = Connection::select($sql, $params);
+            $poems = this->connection->select($sql, $params);
 
             wp_send_json_success($poems);
 

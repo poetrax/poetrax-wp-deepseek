@@ -1,14 +1,60 @@
+<?php
 namespace BM\Core\Repository;
+use BM\Core\Database\Cache;
+use BM\Core\Database\Connection;
+use BM\Core\Database\QueryBuilder;
+use PDO;
 
 abstract class AbstractRepository {
     protected Connection $connection;
-    protected string $tableName;
+    protected Cache $cache;
+    protected QueryBuilder $querybuilder;
+    protected PDO $pdo;
+
+    public function __construct(Connection $connection, Cache $cache, QueryBuilder $querybuilder) {
+        $this->connection = $connection;
+        $this->cache = $cache;
+        $this->querybuilder = $querybuilder;
+        $this->pdo = $this->connection->getPDO();
+    }
     
+    protected function getConnection(): Connection {
+        return $this->connection;
+    }
+    
+    protected function getCache(): Cache {
+        return $this->cache;
+    }
+
+    protected function getQueryBuilder(): QueryBuilder
+    {
+        return $this->querybuilder;
+    }
+
+    protected function getPdo(): PDO
+    {
+        return $this->pdo;
+    }
+}
+
+ /*
+abstract class AbstractRepository {
+    protected Connection $connection;
+    protected string $tableName;
+    /*
     // Добавляем поддержку дополнительных параметров
-    abstract public function delete($id, $userId = null);
-    abstract public function create($data): int;
-    abstract public function find($id);
-    abstract public function getById($id, $userId = null);
+    abstract public function delete($id, $userId = null){
+        //TODO
+    }
+    abstract public function create($data): int{
+        //TODO
+    }
+    abstract public function find($id){
+        //TODO
+    }
+    abstract public function getById($id, $userId = null){
+        //TODO
+    }
 }
 
 // Тогда BlockRepository:
@@ -30,3 +76,4 @@ class BlockRepository extends AbstractRepository {
         return $this->connection->insert($this->getTableName(), $data);
     }
 }
+*/

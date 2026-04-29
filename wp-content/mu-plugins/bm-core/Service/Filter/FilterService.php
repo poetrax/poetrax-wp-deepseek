@@ -6,7 +6,7 @@ use BM\Core\Repository\TrackRepository;
 use BM\Core\Repository\PoetRepository;
 use BM\Core\Repository\PoemRepository;
 use BM\Core\Repository\UserRepository;
-use BM\Core\Config\TableMapper;
+use BM\Core\Database\TableMapper;
 
 class FilterService
 {
@@ -18,7 +18,6 @@ class FilterService
     
     public function __construct()
     {
-        $this->db = Connection::getInstance();
         $this->trackRepo = new TrackRepository();
         $this->poetRepo = new PoetRepository();
         $this->poemRepo = new PoemRepository();

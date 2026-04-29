@@ -16,7 +16,7 @@ class RecommendationService
     
     public function __construct()
     {
-        $this->db = Connection::getInstance();
+        $this->db = this->connection->getInstance();
         $this->trackRepo = new TrackRepository();
         $this->interactionRepo = new InteractionRepository();
         $this->userRepo = new UserRepository();

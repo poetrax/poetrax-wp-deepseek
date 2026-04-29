@@ -32,7 +32,7 @@ function handleGet() {
     if ($id) {
         // Получение одного поэта
         $sql = "SELECT * FROM bm_ctbl000_poet WHERE id = ?";
-        $result = Connection::query($sql, [$id])->fetch();
+        $result = this->connection->query($sql, [$id])->fetch();
         
         if ($result) {
             echo json_encode(['success' => true, 'data' => $result]);
@@ -52,7 +52,7 @@ function handleGet() {
         
         // Общее количество
         $countSql = "SELECT COUNT(*) as total FROM bm_ctbl000_poet $where";
-        $total = Connection::query($countSql, $params)->fetch()['total'];
+        $total = this->connection->query($countSql, $params)->fetch()['total'];
         
         // Данные
         $sql = "SELECT * FROM bm_ctbl000_poet $where 
@@ -62,7 +62,7 @@ function handleGet() {
         $params[] = (int)$limit;
         $params[] = (int)$offset;
         
-        $poets = Connection::query($sql, $params)->fetchAll();
+        $poets = this->connection->query($sql, $params)->fetchAll();
         
         echo json_encode([
             'success' => true,
@@ -95,7 +95,7 @@ function handlePost() {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     
     try {
-        Connection::query($sql, [
+        this->connection->query($sql, [
             $data['last_name'],
             $data['first_name'] ?? null,
             $data['second_name'] ?? null,
@@ -146,7 +146,7 @@ function handlePut() {
     $sql = "UPDATE bm_ctbl000_poet SET " . implode(', ', $fields) . " WHERE id = ?";
     
     try {
-        Connection::query($sql, $params);
+        this->connection->query($sql, $params);
         echo json_encode(['success' => true]);
     } catch (Exception $e) {
         http_response_code(500);
@@ -165,7 +165,7 @@ function handleDelete() {
     
     try {
         $sql = "DELETE FROM bm_ctbl000_poet WHERE id = ?";
-        Connection::query($sql, [$id]);
+        this->connection->query($sql, [$id]);
         echo json_encode(['success' => true]);
     } catch (Exception $e) {
         http_response_code(500);

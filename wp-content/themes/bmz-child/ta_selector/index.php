@@ -13,7 +13,7 @@ function handle_get_properties() {
         global $pdo;
         $query = "SELECT * FROM _test_properties ORDER BY category, name";
         $properties = [];
-        $properties = Connection::query($query);
+        $properties = connection->query($query);
 
         // Используем только один метод вывода
         wp_send_json_success($properties);

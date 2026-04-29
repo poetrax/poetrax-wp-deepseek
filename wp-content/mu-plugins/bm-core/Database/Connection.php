@@ -41,6 +41,32 @@ class Connection
     }
 
 
+    public function update(string $table, array $data, array $where): int
+    {
+        $set = [];
+        $params = [];
+
+        foreach ($data as $column => $value) {
+            $set[] = "{$column} = ?";
+            $params[] = $value;
+        }
+
+        $whereClause = [];
+        foreach ($where as $column => $value) {
+            $whereClause[] = "{$column} = ?";
+            $params[] = $value;
+        }
+
+        $sql = "UPDATE {$table} SET " . implode(', ', $set) .
+            " WHERE " . implode(' AND ', $whereClause);
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->rowCount();
+    }
+
+
     /**
      * Получить скалярное значение (для COUNT, SUM, AVG и т.д.)
      */
@@ -68,8 +94,6 @@ class Connection
     }
 
  
-
-    // fetchAll()
     public function fetchAllASSOC(string $sql, array $params = []): array
     {
         $stmt = $this->query($sql, $params);
@@ -87,7 +111,7 @@ class Connection
     }
 
 
-    public static function getPDO(): PDO
+    public function getPDO(): PDO
     {
         if (self::$pdo === null) {
             throw new Exception('Database not initialized. Call getInstance() first.');
@@ -108,29 +132,19 @@ class Connection
         return true;
     }
 
-
-    public function queryDynamic($sql, $params = [])
+    public function query($sql, $params = [])
     {
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
         return $stmt;
     }
 
-    public static function queryStatic($sql, $params = [])
-    {
-        $connection = self::getInstance();
-        $pdo = $connection->getPdo();
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        return $stmt;
-    }
-  
     public function insertByQuery(string $table, array $data): int
     {
         $columns = implode(', ', array_keys($data));
         $placeholders = ':' . implode(', :', array_keys($data));
         $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
-        $stmt = $this->queryDynamic($sql, $data);
+        $stmt = $this->query($sql, $data);
         return (int) $this->pdo->lastInsertId();
     }
 
@@ -150,7 +164,7 @@ class Connection
         }
         $setStr = implode(', ', $set);
         $sql = "UPDATE {$table} SET {$setStr} WHERE {$where}";
-        $stmt = $this->queryDynamic($sql, $data);
+        $stmt = $this->query($sql, $data);
         return $stmt->rowCount();
     }
 
@@ -176,16 +190,17 @@ class Connection
     public function delete(string $table, string $where): int
     {
         $sql = "DELETE FROM {$table} WHERE {$where}";
-        $stmt = $this->queryDynamic($sql);
+        $stmt = $this->query($sql);
         return $stmt->rowCount();
     }
-    
+
+       
     /**
      * Статические методы для быстрых запросов
      */
     
     //Использование
-    //$poems = Connection::select($sql, $params);
+    //$poems = $this->connection->select($sql, $params);
    
     /**
      * Быстрый SELECT с параметрами
@@ -211,7 +226,7 @@ class Connection
 
     public function fetchOneASSOC(string $sql, array $params = []): ?array
     {
-        $stmt = $this->queryDynamic($sql, $params);
+        $stmt = $this->query($sql, $params);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ?: null;
     }

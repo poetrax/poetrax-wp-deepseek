@@ -12,7 +12,7 @@ class SearchService
 
     public function __construct()
     {
-        $this->pdo = Connection::getPDO();
+        $this->pdo = $this->connection->getPDO();
     }
 
     public function searchTracks(string $query, int $limit = 20): array

@@ -16,10 +16,10 @@
             </thead>
             <tbody>
                 <?php foreach ($poems as $poem): 
-                    $tracks_count = $wpdb->get_var($wpdb->prepare(
+                    $tracks_count = $this->connection->get_var(
                         "SELECT COUNT(*) FROM " . BM_TE_TABLE_TRACK . " WHERE poem_id = %d",
                         $poem->id
-                    ));
+                    );
                 ?>
                 <tr>
                     <td><?php echo $poem->id; ?></td>

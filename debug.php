@@ -15,8 +15,8 @@ $dbConfig = [
 
 use BM\Core\Database\Connection;
 
-$connection = Connection::getInstance($dbConfig);
-$pdo = Connection::getPDO();
+$connection = $this->connection->getInstance($dbConfig);
+$pdo = $this->connection->getPDO();
 
 // Показать 5 примеров названий треков
 $stmt = $pdo->query("SELECT id, track_name FROM bm_ctbl000_track LIMIT 5");

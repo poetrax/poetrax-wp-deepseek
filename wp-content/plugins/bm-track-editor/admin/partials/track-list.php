@@ -29,7 +29,7 @@
             <option value=""><?php _e('Все поэты', 'bm-track-editor'); ?></option>
             <?php
           
-            $poets = $wpdb->get_results("SELECT id, short_name FROM " . BM_TE_TABLE_POET . " ORDER BY last_name");
+            $poets = $this->connection->get_results("SELECT id, short_name FROM " . BM_TE_TABLE_POET . " ORDER BY last_name");
             foreach ($poets as $poet):
             ?>
             <option value="<?php echo $poet->id; ?>" <?php selected($_GET['poet_id'] ?? '', $poet->id); ?>>

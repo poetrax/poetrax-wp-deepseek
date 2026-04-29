@@ -108,7 +108,7 @@ function track_view_api(WP_REST_Request $request) {
     // Логируем просмотр
   
     $table = 'bm_ctbl000_interaction';
-    $wpdb->insert($table, [
+    connection->insert($table, [
         'track_id' => $track_id,
         'user_id' => $user_id,
         'ip' => $ip,
@@ -118,12 +118,12 @@ function track_view_api(WP_REST_Request $request) {
     ]);
     
     // Обновляем счетчик
-    $wpdb->query($wpdb->prepare(
+    connection->query(
         "UPDATE bm_ctbl000_track 
          SET count_view = count_view + 1 
          WHERE id = %d",
         $track_id
-    ));
+    );
     
     return new WP_REST_Response(['success' => true], 200);
 }

@@ -97,7 +97,7 @@ class BM_TE_Admin {
         
         // Получение треков
     
-        $tracks = $wpdb->get_results($wpdb->prepare(
+        $tracks = connection->get_results(
             "SELECT t.*, p.short_name as poet_name 
             FROM " . BM_TE_TABLE_TRACK . " t
             LEFT JOIN " . BM_TE_TABLE_POET . " p ON t.poet_id = p.id
@@ -106,9 +106,9 @@ class BM_TE_Admin {
             LIMIT %d OFFSET %d",
             $tracks_per_page,
             $offset
-        ));
+        );
         
-        $total = $wpdb->get_var("SELECT COUNT(*) FROM " . BM_TE_TABLE_TRACK);
+        $total = connection->get_var("SELECT COUNT(*) FROM " . BM_TE_TABLE_TRACK);
         $total_pages = ceil($total / $tracks_per_page);
         
         include BM_TE_PLUGIN_DIR . 'admin/partials/track-list.php';
@@ -123,12 +123,12 @@ class BM_TE_Admin {
         // Получение данных для выпадающих списков
       
         
-        $poets = $wpdb->get_results("SELECT id, short_name FROM " . BM_TE_TABLE_POET . " WHERE is_active = 1 ORDER BY last_name");
+        $poets = connection->get_results("SELECT id, short_name FROM " . BM_TE_TABLE_POET . " WHERE is_active = 1 ORDER BY last_name");
         
-        $moods = $wpdb->get_results("SELECT * FROM bm_ctbl000_mood WHERE is_active = 1");
-        $themes = $wpdb->get_results("SELECT * FROM bm_ctbl000_theme WHERE is_active = 1");
-        $genres = $wpdb->get_results("SELECT * FROM bm_ctbl000_music_genre WHERE is_active = 1");
-        $instruments = $wpdb->get_results("SELECT * FROM bm_ctbl000_music_instrument WHERE is_active = 1");
+        $moods = connection->get_results("SELECT * FROM bm_ctbl000_mood WHERE is_active = 1");
+        $themes = connection->get_results("SELECT * FROM bm_ctbl000_theme WHERE is_active = 1");
+        $genres = connection->get_results("SELECT * FROM bm_ctbl000_music_genre WHERE is_active = 1");
+        $instruments = connection->get_results("SELECT * FROM bm_ctbl000_music_instrument WHERE is_active = 1");
         
         include BM_TE_PLUGIN_DIR . 'admin/partials/track-editor.php';
     }
@@ -160,7 +160,7 @@ public static function render_poem_list() {
     $offset = ($current_page - 1) * $per_page;
     
    
-    $poems = $wpdb->get_results($wpdb->prepare(
+    $poems = connection->get_results(
         "SELECT p.*, pt.short_name as poet_name 
         FROM " . BM_TE_TABLE_POEM . " p
         LEFT JOIN " . BM_TE_TABLE_POET . " pt ON p.poet_id = pt.id
@@ -169,9 +169,9 @@ public static function render_poem_list() {
         LIMIT %d OFFSET %d",
         $per_page,
         $offset
-    ));
+    );
     
-    $total = $wpdb->get_var("SELECT COUNT(*) FROM " . BM_TE_TABLE_POEM . " WHERE is_active = 1");
+    $total = connection->get_var("SELECT COUNT(*) FROM " . BM_TE_TABLE_POEM . " WHERE is_active = 1");
     $total_pages = ceil($total / $per_page);
     
     include BM_TE_PLUGIN_DIR . 'admin/partials/poem-list.php';
@@ -186,16 +186,16 @@ public static function render_poet_list() {
     $offset = ($current_page - 1) * $per_page;
     
   
-    $poets = $wpdb->get_results($wpdb->prepare(
+    $poets = connection->get_results(
         "SELECT * FROM " . BM_TE_TABLE_POET . " 
         WHERE is_active = 1 
         ORDER BY last_name, first_name
         LIMIT %d OFFSET %d",
         $per_page,
         $offset
-    ));
+    );
     
-    $total = $wpdb->get_var("SELECT COUNT(*) FROM " . BM_TE_TABLE_POET . " WHERE is_active = 1");
+    $total = connection->get_var("SELECT COUNT(*) FROM " . BM_TE_TABLE_POET . " WHERE is_active = 1");
     $total_pages = ceil($total / $per_page);
     
     include BM_TE_PLUGIN_DIR . 'admin/partials/poet-list.php';
@@ -308,7 +308,7 @@ public static function render_track_comments($track_id) {
      */
     public static function get_tracks_count() {
    
-        return $wpdb->get_var("SELECT COUNT(*) FROM " . BM_TE_TABLE_TRACK);
+        return connection->get_var("SELECT COUNT(*) FROM " . BM_TE_TABLE_TRACK);
     }
     
     /**
@@ -316,7 +316,7 @@ public static function render_track_comments($track_id) {
      */
     public static function check_fulltext_index() {
     
-        $result = $wpdb->get_results("SHOW INDEX FROM " . BM_TE_TABLE_TRACK . " WHERE Index_type = 'FULLTEXT'");
+        $result = connection->get_results("SHOW INDEX FROM " . BM_TE_TABLE_TRACK . " WHERE Index_type = 'FULLTEXT'");
         return !empty($result);
     }
 }

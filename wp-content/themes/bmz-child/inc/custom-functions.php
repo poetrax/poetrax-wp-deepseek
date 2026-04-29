@@ -79,7 +79,7 @@ if($path) {
  */
 global $pdo;
 use BM\Core\Database\Connection as DbConnection;
-$connection = DbConnection::getInstance($config);
+$connection = Dbthis->connection->getInstance($config);
 $pdo = $connection->getPdo();
 
 /**
@@ -232,7 +232,7 @@ function ta_music_selector_code($type) {
         $table = $table_map[$type];
         $query = "SELECT id, name, suno_prompt FROM {$table} WHERE is_active = 1 ORDER BY name";
         
-        $items = Connection::query($query);
+        $items = this->connection->query($query);
         $name_group = $name_group_map[$type];
 
         return build_ta($items, $type, $name_group);
@@ -310,7 +310,7 @@ function get_audio_tracks_from_db($limit, $type) {
         $query .= " LIMIT {$limit}";
     }
     
-    $results = Connection::queryStatic($query, [$current_user_id]);
+    $results = this->connection->queryStatic($query, [$current_user_id]);
     return $results;
 }
 
@@ -352,7 +352,7 @@ function get_audio_tracks_from_db_wp($limit, $type) {
         $query .= " LIMIT {$limit}";
     }
     
-    $results = $wpdb->get_results($query);
+    $results = connection->get_results($query);
     return $results;
 }
 

@@ -23,11 +23,6 @@ ob_start(); // буферизация вывода
 $requestUri = $_SERVER['REQUEST_URI'];
 file_put_contents(__DIR__ . '/debug.log', date('Y-m-d H:i:s') . " - " . $requestUri . PHP_EOL, FILE_APPEND);
 
-$_ENV['DEEPSEEK_DB_HOST'] = 'poetrax_deepseek_mysql';
-$_ENV['DEEPSEEK_DB_NAME'] = 'u3436142_poetrax_deepseek_db';
-$_ENV['DEEPSEEK_DB_USER'] = 'u3436142_poetrax_deepseek_user';
-$_ENV['DB_PASSWORD'] = 'CI57bdR7m6F9Xem7';
-
 $dbConfig = [
     'host' => $_ENV['DEEPSEEK_DB_HOST'],
     'database' => $_ENV['DEEPSEEK_DB_NAME'],
@@ -35,9 +30,6 @@ $dbConfig = [
     'password' => $_ENV['DB_PASSWORD'],
 ];
 
-
-$connection = Connection::getInstance($dbConfig);
-$cache = Cache::getInstance();
 $loader = new Loader($connection, $cache, $config);
 $config = Config::getInstance();
 $config->get('key');
@@ -56,7 +48,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 // GET /api/tracks
 if ($requestUri === '/api/tracks' && $method === 'GET') {
     header('Content-Type: application/json');
-    $pdo = Connection::getPDO();
+    $pdo = $this->connection->getPDO();
     $stmt = $pdo->query("SELECT * FROM bm_ctbl000_track LIMIT 50");
     $tracks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 	echo json_encode(['success' => true, 'data' => $tracks]);
@@ -67,7 +59,7 @@ if ($requestUri === '/api/tracks' && $method === 'GET') {
 // GET /api/tracks/popular
 if ($requestUri === '/api/tracks/popular' && $method === 'GET') {
     header('Content-Type: application/json');
-    $pdo = Connection::getPDO();
+    $pdo = $this->connection->getPDO();
     $stmt = $pdo->query("SELECT * FROM bm_ctbl000_track ORDER BY count_play DESC LIMIT 10");
     $tracks = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode(['success' => true, 'data' => $tracks]);
@@ -78,7 +70,7 @@ if ($requestUri === '/api/tracks/popular' && $method === 'GET') {
 if (preg_match('#^/api/tracks/(\d+)$#', $requestUri, $matches) && $method === 'GET') {
     header('Content-Type: application/json');
     $id = (int)$matches[1];
-    $pdo = Connection::getPDO();
+    $pdo = $this->connection->getPDO();
     $stmt = $pdo->prepare("SELECT * FROM bm_ctbl000_track WHERE id = ?");
     $stmt->execute([$id]);
     $track = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -163,7 +155,7 @@ if ($requestUri === '/api/tracks/search' && $method === 'GET') {
         exit;
     }
     
-    $pdo = Connection::getPDO();
+    $pdo = $this->connection->getPDO();
     $stmt = $pdo->prepare("SELECT * FROM bm_ctbl000_track WHERE track_name LIKE ? LIMIT 20");
     $stmt->execute(["%$query%"]);
     $tracks = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -179,7 +171,7 @@ if ($requestUri === '/api/recommendations/user' && $method === 'GET') {
     header('Content-Type: application/json');
     $userId = (int)($_GET['user_id'] ?? 0);
     // Заглушка
-    $pdo = Connection::getPDO();
+    $pdo = $this->connection->getPDO();
     $stmt = $pdo->query("SELECT * FROM bm_ctbl000_track ORDER BY RAND() LIMIT 5");
     $tracks = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode(['success' => true, 'data' => $tracks]);
@@ -191,7 +183,7 @@ if (preg_match('#^/api/recommendations/track/(\d+)$#', $requestUri, $matches) &&
     header('Content-Type: application/json');
     $trackId = (int)$matches[1];
     // Заглушка
-    $pdo = Connection::getPDO();
+    $pdo = $this->connection->getPDO();
     $stmt = $pdo->prepare("SELECT * FROM bm_ctbl000_track WHERE id != ? LIMIT 5");
     $stmt->execute([$trackId]);
     $tracks = $stmt->fetchAll(PDO::FETCH_ASSOC);

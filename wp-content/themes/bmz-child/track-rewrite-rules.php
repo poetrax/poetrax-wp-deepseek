@@ -114,10 +114,10 @@ class TrackRewriteRules {
         
         $table_name = 'bm_ctbl000_track';
         
-        $count = $wpdb->get_var($wpdb->prepare(
+        $count = $this->connection->get_var(
             "SELECT COUNT(*) FROM {$table_name} WHERE id = %d AND status = 'completed'",
             $track_id
-        ));
+        );
         
         return $count > 0;
     }
@@ -137,10 +137,10 @@ class TrackRewriteRules {
        
         $table_name = 'bm_ctbl000_track';
         
-        $track = $wpdb->get_row($wpdb->prepare(
+        $track = $this->connection->get_row(
             "SELECT * FROM {$table_name} WHERE id = %d",
             $track_id
-        ), ARRAY_A);
+        , ARRAY_A);
         
         if (!$track) {
             return new WP_Error('track_not_found', 'Track not found');
@@ -332,13 +332,13 @@ class TrackRewriteRules {
         $table_name = 'bm_ctbl000_track_' . $taxonomy . 's';
         $term_table = 'bm_ctbl000_' . $taxonomy . 's';
         
-        $terms = $wpdb->get_results($wpdb->prepare(
+        $terms = $this->connection->get_results(
             "SELECT t.* FROM {$term_table} t
              INNER JOIN {$table_name} rel ON rel.{$taxonomy}_id = t.id
              WHERE rel.track_id = %d
              ORDER BY t.name",
             $track_id
-        ), ARRAY_A);
+        , ARRAY_A);
         
         return $terms;
     }

@@ -3,9 +3,9 @@ namespace BM\Admin;
 
 use BM\Core\Container;
 use BM\Services\PlayerService;
-use BM\Repositories\TrackRepository;
-use BM\Repositories\PoetRepository;
-use BM\Repositories\PoemRepository;
+use BM\Core\Repository\TrackRepository;
+use BM\Core\Repository\PoetRepository;
+use BM\Core\Repository\PoemRepository;
 use BM\Core\Database\TableMapper;
 
 class TrackEditor {
@@ -15,12 +15,17 @@ class TrackEditor {
     private $poem_repo;
     private $track_id;
     private $track_data;
-    
-    public function __construct() {
-        $this->track_repo = Container::get('track_repository');
-        $this->poet_repo = Container::get('poet_repository');
-        $this->poem_repo = Container::get('poem_repository');
+
+    public function __construct(TrackRepository $track_repo,PoetRepository $poet_repo,PoemRepository $poem_repo) 
+    {
+        $this->track_repo = $track_repo;
+        $this->poet_repo = $poet_repo;
+        $this->poem_repo = $poem_repo;
     }
+
+
+    //Вызов в любом месте где надо
+    //$editor = app(TrackEditor::class);
     
     /**
      * Инициализация редактора
@@ -100,16 +105,16 @@ class TrackEditor {
         
         return [
             'poets' => $this->poet_repo->getAll(),
-            'moods' => $wpdb->get_results("SELECT * FROM " . TableMapper::getInstance()->get('mood') . " WHERE is_active = 1"),
-            'themes' => $wpdb->get_results("SELECT * FROM " . TableMapper::getInstance()->get('theme') . " WHERE is_active = 1"),
-            'tempos' => $wpdb->get_results("SELECT * FROM " . TableMapper::getInstance()->get('music_temp') . " WHERE is_active = 1"),
-            'presentations' => $wpdb->get_results("SELECT * FROM " . TableMapper::getInstance()->get('music_presentation') . " WHERE is_active = 1"),
-            'genres' => $wpdb->get_results("SELECT * FROM " . TableMapper::getInstance()->get('music_genre') . " WHERE is_active = 1"),
-            'instruments' => $wpdb->get_results("SELECT * FROM " . TableMapper::getInstance()->get('music_instrument') . " WHERE is_active = 1"),
-            'voice_genders' => $wpdb->get_results("SELECT * FROM " . TableMapper::getInstance()->get('music_voice_gender') . " WHERE is_active = 1"),
-            'voice_groups' => $wpdb->get_results("SELECT * FROM " . TableMapper::getInstance()->get('music_voice_group') . " WHERE is_active = 1"),
-            'voice_characters' => $wpdb->get_results("SELECT * FROM " . TableMapper::getInstance()->get('voice_character') . " WHERE is_active = 1"),
-            'voice_registers' => $wpdb->get_results("SELECT * FROM " . TableMapper::getInstance()->get('voice_register') . " WHERE is_active = 1"),
+            'moods' => $this->connection->get_results("SELECT * FROM " . TableMapper::getInstance()->get('mood') . " WHERE is_active = 1"),
+            'themes' => $this->connection->get_results("SELECT * FROM " . TableMapper::getInstance()->get('theme') . " WHERE is_active = 1"),
+            'tempos' => $this->connection->get_results("SELECT * FROM " . TableMapper::getInstance()->get('music_temp') . " WHERE is_active = 1"),
+            'presentations' => $this->connection->get_results("SELECT * FROM " . TableMapper::getInstance()->get('music_presentation') . " WHERE is_active = 1"),
+            'genres' => $this->connection->get_results("SELECT * FROM " . TableMapper::getInstance()->get('music_genre') . " WHERE is_active = 1"),
+            'instruments' => $this->connection->get_results("SELECT * FROM " . TableMapper::getInstance()->get('music_instrument') . " WHERE is_active = 1"),
+            'voice_genders' => $this->connection->get_results("SELECT * FROM " . TableMapper::getInstance()->get('music_voice_gender') . " WHERE is_active = 1"),
+            'voice_groups' => $this->connection->get_results("SELECT * FROM " . TableMapper::getInstance()->get('music_voice_group') . " WHERE is_active = 1"),
+            'voice_characters' => $this->connection->get_results("SELECT * FROM " . TableMapper::getInstance()->get('voice_character') . " WHERE is_active = 1"),
+            'voice_registers' => $this->connection->get_results("SELECT * FROM " . TableMapper::getInstance()->get('voice_register') . " WHERE is_active = 1"),
         ];
     }
     
@@ -217,10 +222,10 @@ class TrackEditor {
         
         // Получаем музыкальные детали
       
-        $music_details = $wpdb->get_row($wpdb->prepare(
+        $music_details = $this->connection->get_row(
             "SELECT * FROM " . TableMapper::getInstance()->get('track_music_detail') . " WHERE track_id = %d",
             $track_id
-        ));
+        );
         
         wp_send_json_success([
             'track' => $track,
@@ -237,19 +242,19 @@ class TrackEditor {
         $details['track_id'] = $track_id;
         
         // Проверяем, есть ли уже запись
-        $exists = $wpdb->get_var($wpdb->prepare(
+        $exists = $this->connection->get_var(
             "SELECT id FROM " . TableMapper::getInstance()->get('track_music_detail') . " WHERE track_id = %d",
             $track_id
-        ));
+        );
         
         if ($exists) {
-            $wpdb->update(
+            $this->connection->update(
                 TableMapper::getInstance()->get('track_music_detail'),
                 $details,
                 ['track_id' => $track_id]
             );
         } else {
-            $wpdb->insert(
+            $this->connection->insert(
                 TableMapper::getInstance()->get('track_music_detail'),
                 $details
             );

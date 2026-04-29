@@ -5,8 +5,8 @@ class TrackRepository {
     private $connection;
     
     private function __construct() {
-        $this->connection = Connection::getInstance();
-    }
+ 
+ }
     
     public static function getInstance() {
         if (self::$instance === null) {

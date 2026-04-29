@@ -26,7 +26,7 @@ return [
         'min' => 100,
         'max' => 10000,
     ],
-	   'tables' => [
+	    'tables' => [
         'track' => 'bm_ctbl000_track',
         'poet' => 'bm_ctbl000_poet',
         'poem' => 'bm_ctbl000_poem',

@@ -1,4 +1,4 @@
-
+<?php
 namespace BM\Core\Repository;
 
 use BM\Core\Database\QueryBuilder;
@@ -12,8 +12,7 @@ class ImageRepository implements RepositoryInterface {
     private Cache $cache;
     
     public function __construct() {
-        $this->connection = Connection::getInstance(); // или new Connection()
-        $this->cache = new Cache();
+     
     }
     
     /**
@@ -26,8 +25,7 @@ class ImageRepository implements RepositoryInterface {
         $images = $this->cache->get($cache_key);
         
         if (!$images) {
-            $qb = new QueryBuilder($this->connection);
-            $images = $qb->table('img')
+            $images = $this->querybuilder($this->connection)->table('img')
                 ->where('img_group_id', $group_id)
                 ->where('is_active', 1)
                 ->where('is_approved', 1)
@@ -103,14 +101,13 @@ class ImageRepository implements RepositoryInterface {
     }
     
     public function count(array $conditions = []) {
-        $qb = new QueryBuilder($this->connection);
-        $qb->table('img')->select('COUNT(*) as total');
+        $this->querybuilder($this->connection)->table('img')->select('COUNT(*) as total');
         
         foreach ($conditions as $field => $value) {
-            $qb->where($field, $value);
+           $this->querybuilder($this->connection)->where($field, $value);
         }
         
-        $result = $qb->first();
+        $result = $this->querybuilder($this->connection)->first();
         return $result ? (int)$result->total : 0;
     }
 
@@ -139,22 +136,21 @@ class ImageRepository implements RepositoryInterface {
     }
     
     public function findBy(array $conditions, $limit = null, $orderBy = null) {
-        $qb = new QueryBuilder($this->connection);
-        $qb->table('img');
+        $this->querybuilder($this->connection)->table('img');
         
         foreach ($conditions as $field => $value) {
-            $qb->where($field, $value);
+            $this->querybuilder($this->connection)->where($field, $value);
         }
         
         if ($orderBy) {
-            $qb->orderBy($orderBy);
+            $this->querybuilder($this->connection)->orderBy($orderBy);
         }
         
         if ($limit) {
-            $qb->limit($limit);
+            $this->querybuilder($this->connection)->limit($limit);
         }
         
-        return $qb->get();
+        return $this->querybuilder($this->connection)->get();
     }
 
     public function findOneBy(array $conditions) {
@@ -222,8 +218,7 @@ class ImageRepository implements RepositoryInterface {
         $images = $this->cache->get($cache_key);
         
         if (!$images) {
-            $qb = new QueryBuilder($this->connection);
-            $images = $qb->table('img')
+            $images = $this->querybuilder($this->connection)->table('img')
                 ->where('is_active', 1)
                 ->orderBy('created_at', 'DESC')
                 ->limit($limit, $offset)

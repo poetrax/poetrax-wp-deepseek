@@ -9,16 +9,16 @@ function get_audio_listening_stats($track_id = null, $user_id = null) {
     $where = ["type = 'play'"];
     
     if ($track_id) {
-        $where[] = $wpdb->prepare("track_id = %d", $track_id);
+        $where[] = pdo->prepare("track_id = %d", $track_id);
     }
     
     if ($user_id) {
-        $where[] = $wpdb->prepare("user_id = %d", $user_id);
+        $where[] = pdo->prepare("user_id = %d", $user_id);
     }
     
     $where_clause = implode(' AND ', $where);
     
-    return $wpdb->get_results("
+    return connection->get_results("
         SELECT 
             track_id,
             user_id,
@@ -35,9 +35,9 @@ function get_audio_listening_stats($track_id = null, $user_id = null) {
 // Получение топ треков
 function get_top_audio_tracks($limit = 10) {
   
-    $table_name = $wpdb->prefix . 'ctbl000_interaction';
+    $table_name = prefix . 'ctbl000_interaction';
     
-    return $wpdb->get_results($wpdb->prepare("
+    return connection->query("
         SELECT 
             track_id,
             SUM(play_duration) as total_duration,
@@ -48,7 +48,7 @@ function get_top_audio_tracks($limit = 10) {
         GROUP BY track_id
         ORDER BY total_duration DESC
         LIMIT %d
-    ", $limit));
+    ", $limit);
 }
 
 
@@ -58,13 +58,13 @@ function check_user_has_liked($track_id, $user_id) {
     if (!$user_id) return false;
     
  
-    $table_name = $wpdb->prefix . 'track_interactions';
+    $table_name = prefix . 'track_interactions';
     
-    $result = $wpdb->get_var($wpdb->prepare(
+    $result = connection->query(
         "SELECT COUNT(*) FROM $table_name 
          WHERE track_id = %d AND user_id = %d AND interaction_type = 'like'",
         $track_id, $user_id
-    ));
+    );
     
     return $result > 0;
 }
@@ -73,13 +73,13 @@ function check_user_has_bookmarked($track_id, $user_id) {
     if (!$user_id) return false;
     
   
-    $table_name = $wpdb->prefix . 'track_interactions';
+    $table_name = prefix . 'track_interactions';
     
-    $result = $wpdb->get_var($wpdb->prepare(
+    $result = connection->query(
         "SELECT COUNT(*) FROM $table_name 
          WHERE track_id = %d AND user_id = %d AND interaction_type = 'bookmark'",
         $track_id, $user_id
-    ));
+    );
     
     return $result > 0;
 }
@@ -166,21 +166,21 @@ class AudioTracker {
         
         // Check if track exists
         //HACK audio_url
-        $track_id = $wpdb->get_var($wpdb->prepare(
+        $track_id = $this->connection->get_var(
             "SELECT track_id FROM bm_ctbl000_track WHERE track_path = %s",
             $data['url']
-        ));
+        );
         
         if ($track_id) return $track_id;
         
         // Create new track
-        $wpdb->insert("bm_ctbl000_track", array(
+        connection->query->insert("bm_ctbl000_track", array(
             'post_id' => $data['id'],
             'track_path' => $data['track_path'],
             'track_name' => $data['track_name']
         ));
         
-        return $wpdb->insert_id;
+        return $this->connection->insert_id;
     }
     
     public function register_api_routes() {
@@ -212,7 +212,7 @@ class AudioTracker {
         $user_id = is_user_logged_in() ? get_current_user_id() : null;
         $ip_address = $_SERVER['REMOTE_ADDR'];
         
-        $wpdb->insert("bm_ctbl000_interaction", array(
+        $this->connection->insert("bm_ctbl000_interaction", array(
             'track_id' => $track_id,
             'user_id' => $user_id,
             'ip' => $ip_address,
@@ -232,19 +232,18 @@ class AudioTracker {
         $ip_address = $_SERVER['REMOTE_ADDR'];
         
         // Check if user already liked this track
-        $existing = $wpdb->get_var($wpdb->prepare(
-            "SELECT like_id FROM bm_ctbl000_interaction 
+        $existing = connection->get_var("SELECT like_id FROM bm_ctbl000_interaction 
             WHERE track_id = %d AND type='like' (user_id = %d OR ip = %s)",
             $track_id,
             $user_id,
             $ip_address
-        ));
+        );
         
         if ($existing) {
             return new WP_REST_Response(array('success' => false, 'message' => 'Already liked'), 400);
         }
         
-        $wpdb->insert("bm_ctbl000_interaction", array(
+        $this->connection->insert("bm_ctbl000_interaction", array(
             'track_id' => $track_id,
             'user_id' => $user_id,
             'type'=>'like',
@@ -259,25 +258,25 @@ class AudioTracker {
         
        
         
-        $play_count = $wpdb->get_var($wpdb->prepare(
+        $play_count = $this->connection->get_var(
             "SELECT COUNT(*) FROM bm_ctbl000_interaction WHERE type='play' AND track_id = %d",
             $track_id
-        ));
+        );
         
-        $like_count = $wpdb->get_var($wpdb->prepare(
+        $like_count = $this->connection->get_var(
             "SELECT COUNT(*) FROM bm_ctbl000_interaction WHERE type='like' AND  track_id = %d",
             $track_id
-        ));
+        );
 
-        $view_count = $wpdb->get_var($wpdb->prepare(
+        $view_count = $this->connection->get_var(
             "SELECT COUNT(*) FROM bm_ctbl000_interaction WHERE type='view' AND  track_id = %d",
             $track_id
-        ));
+        );
 
-        $bookmark_count = $wpdb->get_var($wpdb->prepare(
+        $bookmark_count = $this->connection->get_var(
             "SELECT COUNT(*) FROM bm_ctbl000_interaction WHERE type='bookmark' AND  track_id = %d",
             $track_id
-        ));
+        );
 
 
         

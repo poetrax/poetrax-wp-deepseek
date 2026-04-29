@@ -45,7 +45,7 @@ class BM_TE_Installer {
         $missing = [];
         
         foreach ($required_tables as $table) {
-            $result = $wpdb->get_var("SHOW TABLES LIKE '{$table}'");
+            $result = connection->get_var("SHOW TABLES LIKE '{$table}'");
             if ($result !== $table) {
                 $missing[] = $table;
             }

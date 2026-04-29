@@ -57,8 +57,8 @@ spl_autoload_register(function($class) {
 
 // Инициализация с неймспейсом
 add_action('plugins_loaded', function() {
-    BM\Database\Connection::init();
-    BM\Database\Cache::init();
+    BM\Database\this->connection->init();
+    BM\Database\this->cache->init();
 
 });
 

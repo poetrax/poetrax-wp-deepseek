@@ -1,5 +1,5 @@
 <?php
-namespace BM\Repository;
+namespace BM\Core\Repository;
 
 use BM\Core\Database\QueryBuilder;
 use BM\Core\Database\Connection;
@@ -10,22 +10,27 @@ use BM\Core\Repository\RepositoryInterface;
 class DocRepository implements RepositoryInterface
 {
 
+    protected function getTableName(): string
+    {
+        return 'docs';
+    }
+
     /**
      * Получить документ по типу
      */
     public function findByType($type)
     {
         $cache_key = ['doc', 'type', $type];
-        $doc = Cache::get($cache_key);
+        $doc = $this->cache->get($cache_key);
 
         if (!$doc) {
-            $doc = QueryBuilder::table('doc')
+            $doc = $this->qb->table('docs')
                 ->where('document_type', $type)
                 ->where('is_current', 1)
                 ->first();
 
             if ($doc) {
-                Cache::set($cache_key, $doc, 3600 * 24); // 24 часа
+                $this->cache->set($cache_key, $doc, 3600 * 24); // 24 часа
             }
         }
 
@@ -63,13 +68,14 @@ class DocRepository implements RepositoryInterface
     {
         return $this->findByType('agreement');
     }
-
+    
     /**
      * Получить версии документа
      */
     public function getVersions($type)
     {
-        return QueryBuilder::table('doc')
+        $qb = QueryBuilder();
+        return $qb->table('doc')
             ->where('document_type', $type)
             ->orderBy('created_at', 'DESC')
             ->limit(10)
@@ -117,12 +123,12 @@ class DocRepository implements RepositoryInterface
 
         $data = wp_parse_args($data, $defaults);
 
-        $id = Connection::insert('doc', $data);
+        $id = $this->connection->insert('doc', $data);
 
         if ($id) {
             EntityRelations::onEntityCreated($id, 'doc');
 
-            Cache::delete(['doc', 'type', $data['document_type']]);
+            $this->cache->delete(['doc', 'type', $data['document_type']]);
 
             do_action('bm_doc_created', $id, $data);
         }
@@ -143,15 +149,15 @@ class DocRepository implements RepositoryInterface
         if (!empty($data['is_current']) && $doc && !$doc->is_current) {
             $this->resetCurrentFlag($doc->document_type);
         }
-
-        $result = Connection::update('doc', $data, ['id' => $id]);
+     
+        $result =  $this->connection ->update('doc', $data, ['id' => $id]);
 
         if ($result) {
             EntityRelations::setEntityType($id, 'doc');
 
-            Cache::delete(['doc', $id]);
+            $this->cache->delete(['doc', $id]);
             if ($doc) {
-                Cache::delete(['doc', 'type', $doc->document_type]);
+                $this->cache->delete(['doc', 'type', $doc->document_type]);
             }
 
             do_action('bm_doc_updated', $id, $data);
@@ -167,14 +173,14 @@ class DocRepository implements RepositoryInterface
     {
         $doc = $this->find($id);
 
-        $result = Connection::delete('doc', ['id' => $id]);
+        $result = $this->connection->delete('doc', ['id' => $id]);
 
         if ($result) {
             EntityRelations::removeAllRelations($id);
 
-            Cache::delete(['doc', $id]);
+            $this->cache->delete(['doc', $id]);
             if ($doc) {
-                Cache::delete(['doc', 'type', $doc->document_type]);
+                $this->cache->delete(['doc', 'type', $doc->document_type]);
             }
 
             do_action('bm_doc_deleted', $id);
@@ -189,10 +195,10 @@ class DocRepository implements RepositoryInterface
     public function getAll($limit = 100, $offset = 0)
     {
         $cache_key = ['docs', 'all', $limit, $offset];
-        $docs = Cache::get($cache_key);
+        $docs = $this->cache->get($cache_key);
 
         if (!$docs) {
-            $docs = QueryBuilder::table('doc')
+            $docs = $this->querybuilder($this->connection)->table('doc')
                 ->orderBy('document_type')
                 ->orderBy('created_at', 'DESC')
                 ->limit($limit, $offset)
@@ -202,7 +208,7 @@ class DocRepository implements RepositoryInterface
                 $this->enrichDoc($doc);
             }
 
-            Cache::set($cache_key, $docs, 600);
+            $this->cache->set($cache_key, $docs, 600);
         }
 
         return $docs;
@@ -213,9 +219,9 @@ class DocRepository implements RepositoryInterface
      */
     private function resetCurrentFlag($document_type)
     {
-        $table = Connection::table('doc');
+        $table = getTableName();
 
-        return $wpdb->update(
+        return $this->connection->update(
             $table,
             ['is_current' => 0],
             ['document_type' => $document_type]
